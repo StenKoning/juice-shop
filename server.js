@@ -66,7 +66,7 @@ const userProfile = require('./routes/userProfile')
 const updateUserProfile = require('./routes/updateUserProfile')
 const twoFactorAuth = require('./routes/2fa')
 const config = require('config')
-const appsensor = require('./appsensor')
+const appsensor = require('./appsensor/api')
 
 errorhandler.title = `${config.get('application.name')} (Express ${utils.version('express')})`
 
@@ -162,10 +162,15 @@ app.enable('trust proxy')
 app.use('/rest/user/reset-password', new RateLimit({ windowMs: 5 * 60 * 1000, max: 100, keyGenerator ({ headers, ip }) { return headers['X-Forwarded-For'] || ip }, delayMs: 0 }))
 
 /** Testing **/
-app.get('/drollo', function(req, res){
-  appsensor.RestRequestHandlerApi.resourceRestRequestHandlerAddEventPOST();
-  res.send('OK!!!');
-});
+app.get('/drollo', function (req, res) {
+  var reportApi = new appsensor.RestReportingEngineApi()
+  reportApi.resourceRestReportingEngineCountEventsGET()
+    .then((clientResponse) => {
+      console.log(clientResponse.body.)
+      res.send('ok!')
+    })
+    //.catch((reason) => console.log(reason))
+})
 
 /** Authorization **/
 /* Checks on JWT in Authorization header */
