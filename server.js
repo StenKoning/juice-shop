@@ -163,13 +163,17 @@ app.use('/rest/user/reset-password', new RateLimit({ windowMs: 5 * 60 * 1000, ma
 
 /** Testing **/
 app.get('/drollo', function (req, res) {
-  var reportApi = new appsensor.RestReportingEngineApi()
-  reportApi.resourceRestReportingEngineCountEventsGET()
-    .then((clientResponse) => {
-      console.log(clientResponse.body.)
-      res.send('ok!')
+  var reporting = new appsensor.RestReportingEngineApi()
+  reporting
+    .resourceRestReportingEngineCountEventsGET()
+    .then((incomingMessage) => {
+      console.log(incomingMessage.body)
+      res.send('OK!')
     })
-    //.catch((reason) => console.log(reason))
+    .catch((rejection) => {
+      res.send('Something went wrong')
+      console.log(rejection)
+    })
 })
 
 /** Authorization **/
