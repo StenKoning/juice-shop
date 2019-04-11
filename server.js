@@ -1,3 +1,4 @@
+/* eslint-disable no-trailing-spaces */
 const path = require('path')
 const fs = require('fs-extra')
 const morgan = require('morgan')
@@ -68,6 +69,9 @@ const userProfile = require('./routes/userProfile')
 const updateUserProfile = require('./routes/updateUserProfile')
 const twoFactorAuth = require('./routes/2fa')
 const config = require('config')
+const appsensor = require('appsensor/api')
+const appSensorRequestHandler = new appsensor.RestRequestHandlerApi()
+const _ = require('lodash')
 
 errorhandler.title = `${config.get('application.name')} (Express ${utils.version('express')})`
 
@@ -155,6 +159,36 @@ app.use(function jsonParser (req, res, next) {
       req.body = JSON.parse(req.body)
     }
   }
+  next()
+})
+
+app.use(function checkAppSensorIE1 (req, res, next) {
+  var commonXssValues = [
+    '<script>alert(document.cookie);</script>',
+    '<script>alert();</script>',
+    'alert(String.fromCharCode(88,83,83))',
+    '<IMG SRC="javascript:alert(\'XSS\');">',
+    '<IMG SRC=javascript:alert(\'XSS\')>',
+    '<IMG SRC=javascript:alert(&quot;XSS&quot;)">',
+    '<BODY ONLOAD=alert(\'XSS\')>'
+  ]
+
+  // Request headers check
+  var maliciousHeader = _.findIndex(req.headers, function (header) {
+    commonXssValues.forEach(function (xssValue) {
+      if (header.contains(xssValue)) {
+        return true
+      }
+    })
+    return false
+  })
+
+  if (maliciousHeader !== -1) {
+    appSensorRequestHandler.resourceRestRequestHandlerAddAttackPOST();
+  }
+  
+  // Payload check
+  
   next()
 })
 /* HTTP request logging */
