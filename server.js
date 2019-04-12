@@ -69,9 +69,7 @@ const userProfile = require('./routes/userProfile')
 const updateUserProfile = require('./routes/updateUserProfile')
 const twoFactorAuth = require('./routes/2fa')
 const config = require('config')
-const appsensor = require('./appsensor/api')
-const appSensorRequestHandler = new appsensor.RestRequestHandlerApi()
-const _ = require('lodash')
+const appSensorIE1middleware = require('./appsensor/detectionpoints').appSensorIE1middleware
 const expressip = require('express-ip')
 
 errorhandler.title = `${config.get('application.name')} (Express ${utils.version('express')})`
@@ -91,96 +89,11 @@ app.locals.abused_ssrf_bug = false
 /* Compression for all requests */
 app.use(compression())
 
-app.use(function (req, res, next) {
-  req.hasIpInfo = false
-  if (utils.getIpAddress(req) !== '127.0.0.1') {
-    req.hasIpInfo = true
-  }
-
-  next()
-})
-
+// Get IP info (AppSensor dependency)
 app.use(expressip().getIpInfoMiddleware)
 
-app.use(function checkAppSensorIE1 (req, res, next) {
-  var commonXssValues = [
-    '<script>alert(document.cookie);</script>',
-    '<script>alert();</script>',
-    'alert(String.fromCharCode(88,83,83))',
-    '<IMG SRC="javascript:alert(\'XSS\');">',
-    '<IMG SRC=javascript:alert(\'XSS\')>',
-    '<IMG SRC=javascript:alert(&quot;XSS&quot;)">',
-    '<BODY ONLOAD=alert(\'XSS\')>'
-  ]
-
-  // Request headers check
-  var maliciousHeaderName = _.findKey(req.headers, function (headerValue, headerName) {
-    var headerContainsXss = false
-    commonXssValues.forEach(function (commonXssValue) {
-      if (headerValue.indexOf(commonXssValue) !== -1) {
-        return (headerContainsXss = true)
-      }
-    })
-
-    return headerContainsXss
-  })
-
-  /*var maliciousHeaderObj = req.headers[maliciousHeaderName]
-
-  console.log(maliciousHeader)
-  console.log('Checked for XSS headers', maliciousHeader)*/
-
-  if (maliciousHeaderName !== undefined) {
-    console.log('Found malicious header', maliciousHeaderName)
-    var detectionPoint = new appsensor.JsonDetectionpoint()
-    detectionPoint.category = 'Input Validation'
-    detectionPoint.label = 'IE1'
-    detectionPoint.responses = []
-
-    var detectionSystem = new appsensor.JsonDetectionsystem()
-    detectionSystem.detectionSystemId = 'myclientapp'
-
-    var jsonEvent = new appsensor.JsonEvent()
-    jsonEvent.timestamp = new Date().toISOString()
-
-    var ipaddress = new appsensor.JsonIpaddress()
-    ipaddress.address = utils.getIpAddress(req)
-
-    if (req.hasIpInfo) {
-      ipaddress.geoLocation = new appsensor.JsonGeolocation()
-      ipaddress.geoLocation.latitude = req.ipInfo.ll[0]
-      ipaddress.geoLocation.longitude = req.ipInfo.ll[1]
-    }
-
-    var user = new appsensor.JsonUser()
-    user.ipAddress = ipaddress
-
-    jsonEvent.detectionPoint = detectionPoint
-    jsonEvent.detectionSystem = detectionSystem
-    jsonEvent.user = user
-
-    appSensorRequestHandler
-      .resourceRestRequestHandlerAddEventPOST(
-        jsonEvent,
-        {
-          headers: {
-            'X-Appsensor-Client-Application-Name2': 'myclientapp'
-          }
-        })
-      .then(function (incomingMessage) {
-        console.log('Sent event to AppSensor!')
-        //console.log(incomingMessage.response)
-      })
-      .catch(function (rejection) {
-        //console.log(rejection.request.headers)
-        next()
-      })
-  }
-
-  // Payload check
-
-  next()
-})
+// AppSensor detectionpoint for IE1
+//app.use(appSensorIE1middleware)
 
 /* Bludgeon solution for possible CORS problems: Allow everything! */
 app.options('*', cors())
@@ -254,9 +167,6 @@ app.use(function jsonParser (req, res, next) {
   next()
 })
 
-app.use(function (req, res, next) {
-  console.log(req.ipInfo)
-})
 /* HTTP request logging */
 let accessLogStream = require('file-stream-rotator').getStream({ filename: './logs/access.log', frequency: 'daily', verbose: false, max_logs: '2d' })
 app.use(morgan('combined', { stream: accessLogStream }))
