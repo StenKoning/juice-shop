@@ -3,12 +3,20 @@ const chai = require('chai')
 const sinonChai = require('sinon-chai')
 const expect = chai.expect
 chai.use(sinonChai)
-chai.use(require('chai-datetime'));
+chai.use(require('chai-datetime'))
+chai.use(require('chai-http'))
+const frisby = require('frisby')
+const app = require('../../server')
+const appsensor = require('../../appsensor/api')
+
+var mockRequire = require('mock-require')
 
 const findMaliciousHeader = require('../../appsensor/detectionpoints.js').findMaliciousHeader
 const buildJsonIpAddress = require('../../appsensor/detectionpoints.js').buildJsonIpAddress
 const buildJsonUser = require('../../appsensor/detectionpoints.js').buildJsonUser
 const buildAppSensorJsonEvent = require('../../appsensor/detectionpoints.js').buildAppSensorJsonEvent
+
+const APP_URL = 'http://localhost:3000'
 
 describe('Detection Point IE1', () => {
   it('findMaliciousHeader should find the first malicious header', async () => {
@@ -43,6 +51,10 @@ describe('Detection Point IE1', () => {
       // Remove the XSS value from the array, because we've now verified that we can find it
       commonXssValues.shift()
     }
+  })
+
+  it('findMaliciousHeader search for malicious payload in header is case-insensative', async () => {
+    expect(true).to.equal(false) // TODO: Implement feature & test
   })
 
   it('buildJsonIpAddress should not contain GEO location data if the ip is localhost', async () => {
@@ -100,7 +112,30 @@ describe('Detection Point IE1', () => {
     expect(new Date(jsonEvent.timestamp)).to.equalDate(new Date())
   })
 
-  it('Should detect common XSS attack values in HTTP payloads', async () => {
+  it('appSensorIE1middleware detects malicious XSS payloads in headers ', async (done) => {
+    let restRequestHandlerStub = sinon.createStubInstance(appsensor.RestRequestHandlerApi)
 
+    mockRequire.reRequire('../../appsensor/api', {
+      'RestRequestHandlerApi': restRequestHandlerStub
+    })
+
+    mockRequire.reRequire('../../appsensor/detectionpoints', {
+      'RestRequestHandlerApi': restRequestHandlerStub
+    })
+
+    app.server = mockRequire.reRequire('../../server', sinon.stub(app.server))
+    app.server.address.restore()
+
+    chai.request(app.server)
+      .get('/runtime.js')
+      .set('SOME_MALICIOUS_HEADER', '<IMG SRC=javascript:alert(&quot;XSS&quot;)">')
+      .send()
+      .end(function (err, res) {
+        expect(err).to.be.null
+        expect(res).to.have.status(200)
+        expect(restRequestHandlerStub.resourceRestRequestHandlerAddEventPOST.called).to.be.true
+        //var a = restRequestHandlerStub.resourceRestRequestHandlerAddEventPOST.callCount()
+        done()
+      })
   })
 })

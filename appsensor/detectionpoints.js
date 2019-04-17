@@ -48,7 +48,7 @@ module.exports = {
         console.log('Sent event to AppSensor!')
       })
       .catch(function (rejection) {
-        next()
+        // NOP
       })
     next()
   },

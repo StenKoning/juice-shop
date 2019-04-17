@@ -93,7 +93,7 @@ app.use(compression())
 app.use(expressip().getIpInfoMiddleware)
 
 // AppSensor detectionpoint for IE1
-//app.use(appSensorIE1middleware)
+app.use(appSensorIE1middleware)
 
 /* Bludgeon solution for possible CORS problems: Allow everything! */
 app.options('*', cors())
@@ -339,3 +339,5 @@ exports.close = function (exitCode) {
   }
   process.exit(exitCode)
 }
+
+exports.server = server
