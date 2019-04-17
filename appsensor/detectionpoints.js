@@ -4,34 +4,46 @@ const _ = require('lodash')
 const utils = require('../lib/utils')
 
 module.exports = {
-  appSensorIE1middleware: function appSensorIE1middleware (req, res, next) {
-    var commonXssValues = [
-      '<script>alert(document.cookie);</script>',
-      '<script>alert();</script>',
-      'alert(String.fromCharCode(88,83,83))',
-      '<IMG SRC="javascript:alert(\'XSS\');">',
-      '<IMG SRC=javascript:alert(\'XSS\')>',
-      '<IMG SRC=javascript:alert(&quot;XSS&quot;)">',
-      '<BODY ONLOAD=alert(\'XSS\')>'
-    ]
+  detectionSystem: {
+    detectionSystemId: 'myclientapp'
+  },
 
-    // Request headers check
-    var maliciousHeader = module.exports.findMaliciousHeader(req.headers, commonXssValues)
-    if (maliciousHeader === undefined) {
+  detectionPoint_IE1: {
+    category: 'Input Validation',
+    label: 'IE1',
+    responses: []
+  },
+
+  appSensorRequestOptions: {
+    headers: {
+      'X-Appsensor-Client-Application-Name2': 'myclientapp'
+    }
+  },
+
+  commonXssPayloads: [
+    '<script>alert(document.cookie);</script>',
+    '<script>alert();</script>',
+    'alert(String.fromCharCode(88,83,83))',
+    '<IMG SRC="javascript:alert(\'XSS\');">',
+    '<IMG SRC=javascript:alert(\'XSS\')>',
+    '<IMG SRC=javascript:alert(&quot;XSS&quot;)">',
+    '<BODY ONLOAD=alert(\'XSS\')>'
+  ],
+
+  appSensorIE1middleware: function appSensorIE1middleware (req, res, next) {
+    // If there's no malicious header, continue to next middleware
+    if (!module.exports.findMaliciousHeader(req.headers, module.exports.commonXssPayloads)) {
       next()
     }
 
-    console.log('Found malicious header', maliciousHeader)
-    var jsonEvent = module.exports.buildAppSensorJsonEvent(req)
+    var jsonEvent = module.exports.buildAppSensorJsonEvent(
+      module.exports.detectionPoint_IE1,
+      module.exports.detectionSystem,
+      module.exports.buildJsonUser(req, utils.getIpAddress)
+    )
 
     appSensorRequestHandler
-      .resourceRestRequestHandlerAddEventPOST(
-        jsonEvent,
-        {
-          headers: {
-            'X-Appsensor-Client-Application-Name2': 'myclientapp'
-          }
-        })
+      .resourceRestRequestHandlerAddEventPOST(jsonEvent, module.exports.appSensorRequestOptions)
       .then(function (incomingMessage) {
         console.log('Sent event to AppSensor!')
       })
@@ -40,8 +52,9 @@ module.exports = {
       })
     next()
   },
+
   /**
-   * Returns a header name and values, who's value contains a value from the maliciousValues array
+   * Returns a header name and value, who's value contains a value from the maliciousValues array
    * @param headersObj object
    * @param maliciousValuesArr array
    * @returns  {object}||undefined
@@ -57,7 +70,7 @@ module.exports = {
 
       return headerContainsXss
     })
-    if (maliciousHeaderName === undefined) {
+    if (!maliciousHeaderName) {
       return undefined
     }
 
@@ -67,35 +80,16 @@ module.exports = {
     }
   },
 
-  buildAppSensorJsonEvent: function buildAppSensorJsonEvent (req) {
-    const detectionPoint = {
-      category: 'Input Validation',
-      label: 'IE1',
-      responses: []
-    }
-
-    var detectionSystem = {
-      detectionSystemId: 'myclientapp'
-    }
-
-    var user = {
+  buildJsonUser: function buildJsonUser (req, fnGetClientIpAddress) {
+    return {
       username: 'Guest',
-      ipAddress: module.exports.buildJsonIpAddress(req, utils.getIpAddress)
+      ipAddress: module.exports.buildJsonIpAddress(req, fnGetClientIpAddress)
     }
-
-    var jsonEvent = {
-      detectionPoint: detectionPoint,
-      detectionSystem: detectionSystem,
-      user: user,
-      timestamp: new Date().toISOString()
-    }
-
-    return jsonEvent
   },
 
-  buildJsonIpAddress: function buildJsonIpAddress (req, fnGetIpGeoData) {
-    var ipaddress = {
-      address: fnGetIpGeoData(req)
+  buildJsonIpAddress: function buildJsonIpAddress (req, fnGetClientIpAddress) {
+    const ipaddress = {
+      address: fnGetClientIpAddress(req)
     }
 
     if (ipaddress.address !== '127.0.0.1') {
@@ -105,5 +99,14 @@ module.exports = {
     }
 
     return ipaddress
+  },
+
+  buildAppSensorJsonEvent: function buildAppSensorJsonEvent (detectionPoint, detectionSystem, user) {
+    return {
+      detectionPoint: detectionPoint,
+      detectionSystem: detectionSystem,
+      user: user,
+      timestamp: new Date().toISOString()
+    }
   }
 }

@@ -3,9 +3,12 @@ const chai = require('chai')
 const sinonChai = require('sinon-chai')
 const expect = chai.expect
 chai.use(sinonChai)
+chai.use(require('chai-datetime'));
 
 const findMaliciousHeader = require('../../appsensor/detectionpoints.js').findMaliciousHeader
 const buildJsonIpAddress = require('../../appsensor/detectionpoints.js').buildJsonIpAddress
+const buildJsonUser = require('../../appsensor/detectionpoints.js').buildJsonUser
+const buildAppSensorJsonEvent = require('../../appsensor/detectionpoints.js').buildAppSensorJsonEvent
 
 describe('Detection Point IE1', () => {
   it('findMaliciousHeader should find the first malicious header', async () => {
@@ -54,8 +57,9 @@ describe('Detection Point IE1', () => {
         ll: [1.429, -43.63234]
       }
     }
-    const fnGetIpGeoDataFake = sinon.fake.returns('185.101.43.228')
-    const jsonIpAddress = buildJsonIpAddress(fakeRequestObject, fnGetIpGeoDataFake)
+    const fnGetClientIpAddressFake = sinon.fake.returns('185.101.43.228')
+    const jsonIpAddress = buildJsonIpAddress(fakeRequestObject, fnGetClientIpAddressFake)
+    expect(fnGetClientIpAddressFake.called).to.be.equal(true)
     expect(jsonIpAddress).to.deep.equal(
       {
         address: '185.101.43.228',
@@ -66,13 +70,37 @@ describe('Detection Point IE1', () => {
       })
   })
 
-  it('Should detect common XSS attack values in headers', async () => {
-    // Fake a request with malicious header
+  it('buildJsonUser should build the JsonUser object properly', async () => {
+    const fnGetClientIpAddressFake = sinon.fake.returns('127.0.0.1')
+    const jsonUser = buildJsonUser({}, fnGetClientIpAddressFake)
+    expect(fnGetClientIpAddressFake.called).to.be.equal(true)
+    expect(jsonUser.username).to.equal('Guest')
+  })
 
+  it('buildAppSensorJsonEvent should build the JsonEvent object properly', async () => {
+    const detectionSystem = {
+      detectionSystemId: 'myclientapp'
+    }
+
+    const detectionPoint_IE1 = {
+      category: 'Input Validation',
+      label: 'IE1',
+      responses: []
+    }
+
+    const user = {
+      username: 'Guest',
+      ipAddress: { address: '127.0.0.1' }
+    }
+
+    const jsonEvent = buildAppSensorJsonEvent(detectionPoint_IE1, detectionSystem, user)
+    expect(jsonEvent.detectionPoint).to.deep.equal(detectionPoint_IE1)
+    expect(jsonEvent.detectionSystem).to.deep.equal(detectionSystem)
+    expect(jsonEvent.user).to.deep.equal(user)
+    expect(new Date(jsonEvent.timestamp)).to.equalDate(new Date())
   })
 
   it('Should detect common XSS attack values in HTTP payloads', async () => {
 
   })
-
 })
