@@ -1,5 +1,5 @@
 const appsensor = require('../appsensor/api')
-const appSensorRequestHandler = new appsensor.RestRequestHandlerApi()
+
 const _ = require('lodash')
 const utils = require('../lib/utils')
 
@@ -31,6 +31,7 @@ module.exports = {
   ],
 
   appSensorIE1middleware: function appSensorIE1middleware (req, res, next) {
+    console.log('appSensorIE1middleware called!')
     // If there's no malicious header, continue to next middleware
     if (!module.exports.findMaliciousHeader(req.headers, module.exports.commonXssPayloads)) {
       next()
@@ -42,6 +43,10 @@ module.exports = {
       module.exports.buildJsonUser(req, utils.getIpAddress)
     )
 
+    if (!appSensorRequestHandler) {
+      var appSensorRequestHandler = new appsensor.RestRequestHandlerApi()
+    }
+
     appSensorRequestHandler
       .resourceRestRequestHandlerAddEventPOST(jsonEvent, module.exports.appSensorRequestOptions)
       .then(function (incomingMessage) {
@@ -49,6 +54,7 @@ module.exports = {
       })
       .catch(function (rejection) {
         // NOP
+        console.log('Error sending Event to AppSensor')
       })
     next()
   },
@@ -92,7 +98,7 @@ module.exports = {
       address: fnGetClientIpAddress(req)
     }
 
-    if (ipaddress.address !== '127.0.0.1') {
+    if (ipaddress.address !== '127.0.0.1' && req.ipInfo.ll) {
       ipaddress.geoLocation = new appsensor.JsonGeolocation()
       ipaddress.geoLocation.latitude = req.ipInfo.ll[0]
       ipaddress.geoLocation.longitude = req.ipInfo.ll[1]

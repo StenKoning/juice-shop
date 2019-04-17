@@ -8,6 +8,7 @@ chai.use(require('chai-http'))
 const frisby = require('frisby')
 const app = require('../../server')
 const appsensor = require('../../appsensor/api')
+const request = require('request')
 
 var mockRequire = require('mock-require')
 
@@ -15,8 +16,7 @@ const findMaliciousHeader = require('../../appsensor/detectionpoints.js').findMa
 const buildJsonIpAddress = require('../../appsensor/detectionpoints.js').buildJsonIpAddress
 const buildJsonUser = require('../../appsensor/detectionpoints.js').buildJsonUser
 const buildAppSensorJsonEvent = require('../../appsensor/detectionpoints.js').buildAppSensorJsonEvent
-
-const APP_URL = 'http://localhost:3000'
+const appSensorIE1middleware = require('../../appsensor/detectionpoints.js').appSensorIE1middleware
 
 describe('Detection Point IE1', () => {
   it('findMaliciousHeader should find the first malicious header', async () => {
@@ -115,27 +115,20 @@ describe('Detection Point IE1', () => {
   it('appSensorIE1middleware detects malicious XSS payloads in headers ', async (done) => {
     let restRequestHandlerStub = sinon.createStubInstance(appsensor.RestRequestHandlerApi)
 
-    mockRequire.reRequire('../../appsensor/api', {
-      'RestRequestHandlerApi': restRequestHandlerStub
-    })
+    restRequestHandlerStub
+      .resourceRestRequestHandlerAddEventPOST
+      .resolves(true)
 
-    mockRequire.reRequire('../../appsensor/detectionpoints', {
-      'RestRequestHandlerApi': restRequestHandlerStub
-    })
+    const req = sinon.stub(request.get)
+    req.headers = {
+      'x-forwarded-for': '127.0.0.1',
+      'SOME_MALICIOUS_HEADER': '<IMG SRC=javascript:alert(&quot;XSS&quot;)">'
+    }
+    const res = sinon.spy()
+    const next = sinon.spy()
+    appSensorIE1middleware(req, res, next).bind(appSensorIE1middleware, req, res, next, restRequestHandlerStub)
 
-    app.server = mockRequire.reRequire('../../server', sinon.stub(app.server))
-    app.server.address.restore()
-
-    chai.request(app.server)
-      .get('/runtime.js')
-      .set('SOME_MALICIOUS_HEADER', '<IMG SRC=javascript:alert(&quot;XSS&quot;)">')
-      .send()
-      .end(function (err, res) {
-        expect(err).to.be.null
-        expect(res).to.have.status(200)
-        expect(restRequestHandlerStub.resourceRestRequestHandlerAddEventPOST.called).to.be.true
-        //var a = restRequestHandlerStub.resourceRestRequestHandlerAddEventPOST.callCount()
-        done()
-      })
+    expect(restRequestHandlerStub.resourceRestRequestHandlerAddEventPOST.called).to.be.true
+    done()
   })
 })
