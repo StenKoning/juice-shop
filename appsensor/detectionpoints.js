@@ -41,10 +41,10 @@ module.exports = {
     next()
   },
   /**
-   * Returns a header, who's value contains a value from the maliciousValues array
+   * Returns a header name and values, who's value contains a value from the maliciousValues array
    * @param headersObj object
    * @param maliciousValuesArr array
-   * @returns {string}||undefined
+   * @returns  {object}||undefined
    */
   findMaliciousHeader: function findMaliciousHeader (headersObj, maliciousValuesArr) {
     var maliciousHeaderName = _.findKey(headersObj, function (headerValue, headerName) {
@@ -60,7 +60,11 @@ module.exports = {
     if (maliciousHeaderName === undefined) {
       return undefined
     }
-    return headersObj[maliciousHeaderName]
+
+    return {
+      name: maliciousHeaderName,
+      value: headersObj[maliciousHeaderName]
+    }
   },
 
   buildAppSensorJsonEvent: function buildAppSensorJsonEvent (req) {
