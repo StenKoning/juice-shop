@@ -98,7 +98,7 @@ module.exports = {
       address: fnGetIpGeoData(req)
     }
 
-    if (utils.getIpAddress(req) !== '127.0.0.1') {
+    if (ipaddress.address !== '127.0.0.1') {
       ipaddress.geoLocation = new appsensor.JsonGeolocation()
       ipaddress.geoLocation.latitude = req.ipInfo.ll[0]
       ipaddress.geoLocation.longitude = req.ipInfo.ll[1]

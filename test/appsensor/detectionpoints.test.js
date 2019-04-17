@@ -1,5 +1,11 @@
-var describe = require('selenium-webdriver/testing').describe
-var findMaliciousHeader = require('../../appsensor/detectionpoints.js').findMaliciousHeader
+const sinon = require('sinon')
+const chai = require('chai')
+const sinonChai = require('sinon-chai')
+const expect = chai.expect
+chai.use(sinonChai)
+
+const findMaliciousHeader = require('../../appsensor/detectionpoints.js').findMaliciousHeader
+const buildJsonIpAddress = require('../../appsensor/detectionpoints.js').buildJsonIpAddress
 
 describe('Detection Point IE1', () => {
   it('findMaliciousHeader should find the first malicious header', async () => {
@@ -30,10 +36,34 @@ describe('Detection Point IE1', () => {
         name: Object.keys(headers)[i],
         value: headers[Object.keys(headers)[i]]
       }
-      expect(foundMaliciousHeader).toEqual(actualMaliciousHeader)
+      expect(foundMaliciousHeader).to.deep.equal(actualMaliciousHeader)
       // Remove the XSS value from the array, because we've now verified that we can find it
       commonXssValues.shift()
     }
+  })
+
+  it('buildJsonIpAddress should not contain GEO location data if the ip is localhost', async () => {
+    const fnGetIpGeoDataFake = sinon.fake.returns('127.0.0.1')
+    const jsonIpAddress = buildJsonIpAddress({}, fnGetIpGeoDataFake)
+    expect(jsonIpAddress).to.deep.equal({ address: '127.0.0.1' })
+  })
+
+  it('buildJsonIpAddress should get the GEO location data from a expressjs request object if not localhost ip', async () => {
+    const fakeRequestObject = {
+      ipInfo: {
+        ll: [1.429, -43.63234]
+      }
+    }
+    const fnGetIpGeoDataFake = sinon.fake.returns('185.101.43.228')
+    const jsonIpAddress = buildJsonIpAddress(fakeRequestObject, fnGetIpGeoDataFake)
+    expect(jsonIpAddress).to.deep.equal(
+      {
+        address: '185.101.43.228',
+        geoLocation: {
+          latitude: 1.429,
+          longitude: -43.63234
+        }
+      })
   })
 
   it('Should detect common XSS attack values in headers', async () => {
