@@ -43,13 +43,7 @@ module.exports = {
       module.exports.buildJsonUser(req, utils.getIpAddress)
     )
 
-    if (arguments[3]) {
-      var appSensorRequestHandler = arguments[3]
-    } else if (!arguments[3]) {
-      var appSensorRequestHandler = new appsensor.RestRequestHandlerApi()
-    }
-
-    appSensorRequestHandler
+    new appsensor.RestRequestHandlerApi()
       .resourceRestRequestHandlerAddEventPOST(jsonEvent, module.exports.appSensorRequestOptions)
       .then(function (incomingMessage) {
         console.log('Sent event to AppSensor!')

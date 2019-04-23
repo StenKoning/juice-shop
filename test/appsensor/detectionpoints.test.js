@@ -53,7 +53,7 @@ describe('Detection Point IE1', () => {
     }
   })
 
-  it('findMaliciousHeader search for malicious payload in header is case-insensative', async () => {
+  it('findMaliciousHeader search for malicious payload in header is case-insensitive', async () => {
     expect(true).to.equal(false) // TODO: Implement feature & test
   })
 
@@ -110,29 +110,6 @@ describe('Detection Point IE1', () => {
     expect(jsonEvent.detectionSystem).to.deep.equal(detectionSystem)
     expect(jsonEvent.user).to.deep.equal(user)
     expect(new Date(jsonEvent.timestamp)).to.equalDate(new Date())
-  })
-
-  // Get event count
-  // Send malicious headers
-  // Assert event count +1
-  it('appSensorIE1middleware malicious header unit test', async (done) => {
-    let restRequestHandlerStub = sinon.createStubInstance(appsensor.RestRequestHandlerApi)
-
-    restRequestHandlerStub
-      .resourceRestRequestHandlerAddEventPOST
-      .resolves(true)
-
-    const req = sinon.stub(request.get)
-    req.headers = {
-      'x-forwarded-for': '127.0.0.1',
-      'SOME_MALICIOUS_HEADER': '<IMG SRC=javascript:alert(&quot;XSS&quot;)">'
-    }
-    const res = sinon.spy()
-    const next = sinon.spy()
-    appSensorIE1middleware(req, res, next, restRequestHandlerStub)
-
-    expect(restRequestHandlerStub.resourceRestRequestHandlerAddEventPOST.called).to.be.true
-    done()
   })
 
   it('appSensorIE1middleware detects malicious XSS payloads in headers and sends event to AppSensor', async (done) => {
