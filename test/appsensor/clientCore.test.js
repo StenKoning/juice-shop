@@ -60,9 +60,10 @@ describe('payloadContainsMaliciousString', () => {
       '<BODY ONLOAD=alert(\'XSS\')>'
     ]
 
-    const req = {
-      body: ''
-    }
+    const payload = '"{"x":5,"y":"<IMG SRC=javascript:alert(\'XSS\')>"}"'
+
+    expect(clientCore.payloadContainsMaliciousString(payload, commonXssValues)).to.be.true
+    expect(clientCore.payloadContainsMaliciousString(payload, ['foo', 'bar'])).to.be.false
   })
 })
 

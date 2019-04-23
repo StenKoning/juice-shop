@@ -56,13 +56,13 @@ module.exports = {
   },
 
   payloadContainsMaliciousString: function (httpPayloadStr, maliciousValuesArr) {
+    let containsMaliciousString = false
     maliciousValuesArr.forEach(function (commonXssValue) {
       if (httpPayloadStr.indexOf(commonXssValue) !== -1) {
-        return true
+        containsMaliciousString = true
       }
     })
-
-    return false
+    return containsMaliciousString
   },
 
   postEventToAppSensor: function (jsonEvent) {
