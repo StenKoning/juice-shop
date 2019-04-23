@@ -8,7 +8,7 @@ chai.use(require('chai-http'))
 const frisby = require('frisby')
 const app = require('../../server')
 const appsensor = require('../../appsensor/api')
-const request = require('request')
+const request = chai.request
 
 var mockRequire = require('mock-require')
 
@@ -112,7 +112,10 @@ describe('Detection Point IE1', () => {
     expect(new Date(jsonEvent.timestamp)).to.equalDate(new Date())
   })
 
-  it('appSensorIE1middleware detects malicious XSS payloads in headers ', async (done) => {
+  // Get event count
+  // Send malicious headers
+  // Assert event count +1
+  /*it('appSensorIE1middleware detects malicious XSS payloads in headers ', async (done) => {
     let restRequestHandlerStub = sinon.createStubInstance(appsensor.RestRequestHandlerApi)
 
     restRequestHandlerStub
@@ -129,6 +132,24 @@ describe('Detection Point IE1', () => {
     appSensorIE1middleware(req, res, next).bind(appSensorIE1middleware, req, res, next, restRequestHandlerStub)
 
     expect(restRequestHandlerStub.resourceRestRequestHandlerAddEventPOST.called).to.be.true
+    done()
+  })*/
+
+  it('appSensorIE1middleware detects malicious XSS payloads in headers and sends event to AppSensor', async (done) => {
+    const appsensorReporter = new appsensor.RestReportingEngineApi()
+    const initialEventCountPromise = await appsensorReporter.resourceRestReportingEngineCountEventsGET()
+    const initialEventCount = initialEventCountPromise.response.body
+
+    await request(app.server)
+      .get('/runtime.js')
+      .set('x-forwarded-for', '127.0.0.1')
+      .set('SOME_MALICIOUS_HEADER', '<IMG SRC=javascript:alert(&quot;XSS&quot;)">')
+      .send()
+
+    const eventCountAfterMaliciousRequestPromise = await appsensorReporter.resourceRestReportingEngineCountEventsGET()
+    const eventCountAfterMaliciousRequest = eventCountAfterMaliciousRequestPromise.response.body
+
+    expect(eventCountAfterMaliciousRequest).to.equal(initialEventCount + 1)
     done()
   })
 })
