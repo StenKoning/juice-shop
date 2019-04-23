@@ -129,4 +129,22 @@ describe('Detection Point IE1', () => {
     expect(eventCountAfterMaliciousRequest).to.equal(initialEventCount + 1)
     done()
   })
+
+  it('appSensorIE1middleware ignores header payloads that aren\'t blacklisted', async (done) => {
+    const appsensorReporter = new appsensor.RestReportingEngineApi()
+    const initialEventCountPromise = await appsensorReporter.resourceRestReportingEngineCountEventsGET()
+    const initialEventCount = initialEventCountPromise.response.body
+
+    await request(app.server)
+      .get('/runtime.js')
+      .set('x-forwarded-for', '127.0.0.1')
+      .set('SOME_NON_MALICIOUS_HEADER', 'some non malicious value')
+      .send()
+
+    const eventCountAfterRequestPromise = await appsensorReporter.resourceRestReportingEngineCountEventsGET()
+    const eventCountAfterRequest = eventCountAfterRequestPromise.response.body
+
+    expect(eventCountAfterRequest).to.equal(initialEventCount)
+    done()
+  })
 })

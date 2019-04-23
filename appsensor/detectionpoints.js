@@ -34,7 +34,7 @@ module.exports = {
     console.log('appSensorIE1middleware called!')
     // If there's no malicious header, continue to next middleware
     if (!module.exports.findMaliciousHeader(req.headers, module.exports.commonXssPayloads)) {
-      next()
+      return next()
     }
 
     var jsonEvent = module.exports.buildAppSensorJsonEvent(
@@ -52,7 +52,7 @@ module.exports = {
         // NOP
         console.log('Error sending Event to AppSensor')
       })
-    next()
+    return next()
   },
 
   /**
