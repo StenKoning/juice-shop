@@ -69,7 +69,7 @@ const userProfile = require('./routes/userProfile')
 const updateUserProfile = require('./routes/updateUserProfile')
 const twoFactorAuth = require('./routes/2fa')
 const config = require('config')
-const appSensorIE1middleware = require('./appsensor/detectionpoints').appSensorIE1middleware
+const detectionPoints = require('./appsensor/detectionpoints')
 const expressip = require('express-ip')
 
 errorhandler.title = `${config.get('application.name')} (Express ${utils.version('express')})`
@@ -93,7 +93,7 @@ app.use(compression())
 app.use(expressip().getIpInfoMiddleware)
 
 // AppSensor detectionpoint for IE1
-app.use(appSensorIE1middleware)
+app.use(detectionPoints.IE1.middleware.checkHeadersForXssPayload)
 
 /* Bludgeon solution for possible CORS problems: Allow everything! */
 app.options('*', cors())
@@ -151,6 +151,8 @@ app.use(express.static(path.join(__dirname, '/frontend/dist/frontend')))
 app.use(cookieParser('kekse'))
 
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(detectionPoints.IE1.middleware.checkBodyForXssPayload)
+
 /* File Upload */
 app.post('/file-upload', upload.single('file'), fileUpload())
 app.post('/profile/image/file', upload.single('file'), profileImageFileUpload())
