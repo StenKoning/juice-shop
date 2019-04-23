@@ -35,15 +35,15 @@ module.exports = {
   },
 
   requestContainsMaliciousHeaders: function (req) {
-    return clientCore
+    return Boolean(clientCore
       .findFirstHeaderThatContainsValueFromArray(
         req.headers,
         clientCore.commonXssPayloads
-      ) === true
+      ))
   },
 
   buildAppSensorIE1JsonEvent: function (req) {
-    return module.exports.buildAppSensorJsonEvent(
+    return clientCore.buildAppSensorJsonEvent(
       clientCore.detectionPoint_IE1,
       clientCore.detectionSystem,
       clientCore.buildJsonUser(req, utils.getIpAddress)
