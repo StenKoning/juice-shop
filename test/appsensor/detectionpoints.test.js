@@ -115,7 +115,7 @@ describe('Detection Point IE1', () => {
   // Get event count
   // Send malicious headers
   // Assert event count +1
-  /*it('appSensorIE1middleware detects malicious XSS payloads in headers ', async (done) => {
+  it('appSensorIE1middleware malicious header unit test', async (done) => {
     let restRequestHandlerStub = sinon.createStubInstance(appsensor.RestRequestHandlerApi)
 
     restRequestHandlerStub
@@ -129,11 +129,11 @@ describe('Detection Point IE1', () => {
     }
     const res = sinon.spy()
     const next = sinon.spy()
-    appSensorIE1middleware(req, res, next).bind(appSensorIE1middleware, req, res, next, restRequestHandlerStub)
+    appSensorIE1middleware(req, res, next, restRequestHandlerStub)
 
     expect(restRequestHandlerStub.resourceRestRequestHandlerAddEventPOST.called).to.be.true
     done()
-  })*/
+  })
 
   it('appSensorIE1middleware detects malicious XSS payloads in headers and sends event to AppSensor', async (done) => {
     const appsensorReporter = new appsensor.RestReportingEngineApi()

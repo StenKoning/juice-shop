@@ -43,7 +43,9 @@ module.exports = {
       module.exports.buildJsonUser(req, utils.getIpAddress)
     )
 
-    if (!appSensorRequestHandler) {
+    if (arguments[3]) {
+      var appSensorRequestHandler = arguments[3]
+    } else if (!arguments[3]) {
       var appSensorRequestHandler = new appsensor.RestRequestHandlerApi()
     }
 
