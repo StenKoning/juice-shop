@@ -1,5 +1,6 @@
 const clientCore = require('./clientCore')
 const utils = require('../lib/utils')
+const _ = require('lodash')
 
 module.exports = {
   middleware: {
@@ -19,7 +20,8 @@ module.exports = {
     },
 
     checkBodyForXssPayload: function dpmCheckBodyForXssPayload (req, res, next) {
-      if (!clientCore.payloadContainsMaliciousString(req.body, module.exports.commonXssPayloads)) {
+      var bodyIsEmpty = _.isEmpty(req.body)
+      if (_.isEmpty(req.body) || !clientCore.payloadContainsMaliciousString(req.body, clientCore.commonXssPayloads)) {
         return next()
       }
 

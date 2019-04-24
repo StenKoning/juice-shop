@@ -151,7 +151,7 @@ app.use(express.static(path.join(__dirname, '/frontend/dist/frontend')))
 app.use(cookieParser('kekse'))
 
 app.use(bodyParser.urlencoded({ extended: true }))
-app.use(detectionPoints.IE1.middleware.checkBodyForXssPayload)
+
 
 /* File Upload */
 app.post('/file-upload', upload.single('file'), fileUpload())
@@ -168,6 +168,8 @@ app.use(function jsonParser (req, res, next) {
   }
   next()
 })
+
+app.use(detectionPoints.IE1.middleware.checkBodyForXssPayload)
 
 /* HTTP request logging */
 let accessLogStream = require('file-stream-rotator').getStream({ filename: './logs/access.log', frequency: 'daily', verbose: false, max_logs: '2d' })

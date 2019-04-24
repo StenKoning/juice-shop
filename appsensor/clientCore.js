@@ -55,10 +55,12 @@ module.exports = {
     }
   },
 
-  payloadContainsMaliciousString: function (httpPayloadStr, maliciousValuesArr) {
+  payloadContainsMaliciousString: function (requestBody, maliciousValuesArr) {
     let containsMaliciousString = false
+    const requestBodyAsStr = Object.values(requestBody).join()
+
     maliciousValuesArr.forEach(function (commonXssValue) {
-      if (httpPayloadStr.indexOf(commonXssValue) !== -1) {
+      if (requestBodyAsStr.indexOf(commonXssValue) !== -1) {
         containsMaliciousString = true
       }
     })
