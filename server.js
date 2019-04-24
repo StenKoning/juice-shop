@@ -1,3 +1,4 @@
+/* eslint-disable no-trailing-spaces,no-multiple-empty-lines */
 const path = require('path')
 const fs = require('fs-extra')
 const morgan = require('morgan')
@@ -68,6 +69,8 @@ const userProfile = require('./routes/userProfile')
 const updateUserProfile = require('./routes/updateUserProfile')
 const twoFactorAuth = require('./routes/2fa')
 const config = require('config')
+const detectionPoints = require('./appsensor/detectionpoints')
+const expressip = require('express-ip')
 
 errorhandler.title = `${config.get('application.name')} (Express ${utils.version('express')})`
 
@@ -85,6 +88,12 @@ app.locals.abused_ssrf_bug = false
 
 /* Compression for all requests */
 app.use(compression())
+
+// Get IP info (AppSensor dependency)
+app.use(expressip().getIpInfoMiddleware)
+
+// AppSensor detectionpoint for IE1
+app.use(detectionPoints.IE1.middleware.checkHeadersForXssPayload)
 
 /* Bludgeon solution for possible CORS problems: Allow everything! */
 app.options('*', cors())
@@ -142,6 +151,8 @@ app.use(express.static(path.join(__dirname, '/frontend/dist/frontend')))
 app.use(cookieParser('kekse'))
 
 app.use(bodyParser.urlencoded({ extended: true }))
+
+
 /* File Upload */
 app.post('/file-upload', upload.single('file'), fileUpload())
 app.post('/profile/image/file', upload.single('file'), profileImageFileUpload())
@@ -157,6 +168,9 @@ app.use(function jsonParser (req, res, next) {
   }
   next()
 })
+
+app.use(detectionPoints.IE1.middleware.checkBodyForXssPayload)
+
 /* HTTP request logging */
 let accessLogStream = require('file-stream-rotator').getStream({ filename: './logs/access.log', frequency: 'daily', verbose: false, max_logs: '2d' })
 app.use(morgan('combined', { stream: accessLogStream }))
@@ -329,3 +343,5 @@ exports.close = function (exitCode) {
   }
   process.exit(exitCode)
 }
+
+exports.server = server
