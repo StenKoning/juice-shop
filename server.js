@@ -71,6 +71,7 @@ const twoFactorAuth = require('./routes/2fa')
 const config = require('config')
 const detectionPoints = require('./appsensor/detectionpoints')
 const expressip = require('express-ip')
+const appSensorClientCore = require('./appsensor/clientCore')
 
 errorhandler.title = `${config.get('application.name')} (Express ${utils.version('express')})`
 
@@ -315,11 +316,35 @@ app.get('/we/may/also/instruct/you/to/refuse/all/reasonably/necessary/responsibi
 app.get('/profile', userProfile())
 app.post('/profile', updateUserProfile())
 
+// Used by AppSensor detection points
+app.use(function addAllRoutesAndMethodsToReq (req, res, next) {
+  let currentRoute = []
+  let allRoutes = []
+
+  app._router.stack.forEach(function (middleware) {
+    if (middleware.route) { // routes registered directly on the app
+      allRoutes.push(middleware.route)
+    } else if (middleware.name === 'router') { // router middleware
+      middleware.handle.stack.forEach(function (handler) {
+        currentRoute = handler.route
+        currentRoute && allRoutes.push(currentRoute)
+      })
+    }
+  })
+
+  req.allRoutes = allRoutes
+  return next()
+})
+
+
+app.use([detectionPoints.RE1.middleware.unexpectedHttpMethodIsUsed])
+
 app.use(angular())
 
 /* Error Handling */
 app.use(verify.errorHandlingChallenge())
 app.use(errorhandler())
+
 
 exports.start = async function (readyCallback) {
   await models.sequelize.sync({ force: true })

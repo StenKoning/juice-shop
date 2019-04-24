@@ -12,6 +12,12 @@ module.exports = {
     responses: []
   },
 
+  detectionPoint_RE1: {
+    category: 'Unexpected HTTP Command',
+    label: 'RE1',
+    responses: []
+  },
+
   appSensorRequestOptions: {
     headers: {
       'X-Appsensor-Client-Application-Name2': 'myclientapp'
