@@ -336,8 +336,8 @@ app.use(function addAllRoutesAndMethodsToReq (req, res, next) {
   return next()
 })
 
-
 app.use([
+  detectionPoints.RE4.middleware.receivingPostWhenExpectingGet,
   detectionPoints.RE3.middleware.receivingGetWhenExpectingPost,
   detectionPoints.RE2.middleware.attemptToInvokeUnsupportedHttpMethod,
   detectionPoints.RE1.middleware.unexpectedHttpMethodIsUsed

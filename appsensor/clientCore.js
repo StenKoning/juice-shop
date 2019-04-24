@@ -30,6 +30,12 @@ module.exports = {
     responses: []
   },
 
+  detectionPoint_RE4: {
+    category: 'POST When Expecting GET',
+    label: 'RE4',
+    responses: []
+  },
+
   appSensorRequestOptions: {
     headers: {
       'X-Appsensor-Client-Application-Name2': 'myclientapp'
