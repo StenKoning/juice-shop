@@ -337,7 +337,10 @@ app.use(function addAllRoutesAndMethodsToReq (req, res, next) {
 })
 
 
-app.use([detectionPoints.RE1.middleware.unexpectedHttpMethodIsUsed])
+app.use([
+  detectionPoints.RE2.middleware.attemptToInvokeUnsupportedHttpMethod,
+  detectionPoints.RE1.middleware.unexpectedHttpMethodIsUsed
+])
 
 app.use(angular())
 

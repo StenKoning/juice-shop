@@ -18,6 +18,12 @@ module.exports = {
     responses: []
   },
 
+  detectionPoint_RE2: {
+    category: 'Attempt To Invoke Unsupported HTTP Method',
+    label: 'RE2',
+    responses: []
+  },
+
   appSensorRequestOptions: {
     headers: {
       'X-Appsensor-Client-Application-Name2': 'myclientapp'
