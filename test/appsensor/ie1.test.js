@@ -77,4 +77,8 @@ describe('checkBodyForXssPayload', () => {
     expect(eventCountAfterRequest).to.equal(initialEventCount + 1)
     done()
   })
+
+  it('should be case-insensitive when looking for XSS values', () => {
+    expect(true).to.be.false
+  })
 })
