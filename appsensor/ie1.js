@@ -1,6 +1,7 @@
 const clientCore = require('./clientCore')
 const utils = require('../lib/utils')
 const _ = require('lodash')
+const Promise = require('bluebird')
 
 module.exports = {
   middleware: {
