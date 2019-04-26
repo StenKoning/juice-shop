@@ -33,3 +33,10 @@ describe('unexpectedHttpMethodIsUsed', () => {
     done()
   })
 })
+
+describe('attemptToInvokeUnsupportedHttpMethod', () => {
+  it('should return next() if the HTTP verb differs from \'HEAD\', \'GET\', \'POST\', \'PUT\', \'DELETE\', \'TRACE\', \'OPTIONS\', \'CONNECT\'')
+  it('should post a new RE2 event to AppSensor')
+  it('should respond with 405 Method Not Allowed')
+  it('should respond with HTTP 502 Bad Gateway if AppSensor server is unavailable')
+})

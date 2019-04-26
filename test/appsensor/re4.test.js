@@ -38,3 +38,10 @@ describe('receivingPostWhenExpectingGet', () => {
     done()
   })
 })
+
+describe('receivingPostWhenExpectingGet', () => {
+  it('should return next() if the HTTP verb is not \'POST\'')
+  it('should post a new RE4 event to AppSensor')
+  it('should respond with 405 Method Not Allowed')
+  it('should respond with HTTP 502 Bad Gateway if AppSensor server is unavailable')
+})

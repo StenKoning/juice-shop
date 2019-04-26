@@ -82,3 +82,22 @@ describe('checkBodyForXssPayload', () => {
     expect(true).to.be.false
   })
 })
+
+describe('checkHeadersForXssPayload', () => {
+  it('should call next() when there\'s no blacklisted value found in header')
+  it('should post a new IE1 event to AppSensor')
+  it('should respond with HTTP 400 Bad Request')
+  it('should respond with HTTP 502 Bad Gateway if AppSensor server is unavailable')
+})
+
+describe('checkBodyForXssPayload', () => {
+  it('should call next() when there\'s no blacklisted value found in HTTP payload')
+  it('should post a new IE1 event to AppSensor')
+  it('should respond with HTTP 400 Bad Request')
+  it('should respond with HTTP 502 Bad Gateway if AppSensor server is unavailable')
+})
+
+describe('requestContainsMaliciousHeaders', () => {
+  it('should return true if given header array contains a value from blacklist')
+  it('should return false if given header array doesn\'t contain a value from blacklist')
+})

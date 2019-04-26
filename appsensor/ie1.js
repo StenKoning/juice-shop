@@ -20,7 +20,6 @@ module.exports = {
     },
 
     checkBodyForXssPayload: function dpmCheckBodyForXssPayload (req, res, next) {
-      var bodyIsEmpty = _.isEmpty(req.body)
       if (_.isEmpty(req.body) || !clientCore.payloadContainsMaliciousString(req.body, clientCore.commonXssPayloads)) {
         return next()
       }

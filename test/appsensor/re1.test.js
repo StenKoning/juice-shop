@@ -33,3 +33,10 @@ describe('unexpectedHttpMethodIsUsed', () => {
     done()
   })
 })
+
+describe('unexpectedHttpMethodIsUsed', () => {
+  it('should return next() if there is no route that matches the current url')
+  it('should post a new RE1 event to AppSensor if an unexpectedHttpMethod is used')
+  it('should respond with 405 Method Not Allowed')
+  it('should respond with HTTP 502 Bad Gateway if AppSensor server is unavailable')
+})

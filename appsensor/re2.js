@@ -6,18 +6,20 @@ module.exports = {
   middleware: {
     attemptToInvokeUnsupportedHttpMethod: function (req, res, next) {
       const allowedMethods = ['HEAD', 'GET', 'POST', 'PUT', 'DELETE', 'TRACE', 'OPTIONS', 'CONNECT']
-      if (!allowedMethods.includes(req.method.toUpperCase())) {
-        // report RE2 to AppSensor (Attempt To Invoke Unsupported Http Method)
-        clientCore
-          .postEventToAppSensor(module.exports.buildAppSensorRE2JsonEvent(req))
-          .then(function () {
-            return res.send(405)
-          })
-          .catch(function (rejection) {
-            console.log('Error sending Event to AppSensor', rejection)
-            res.send(502)
-          })
+      if (allowedMethods.includes(req.method.toUpperCase())) {
+        next()
       }
+
+      // report RE2 to AppSensor (Attempt To Invoke Unsupported Http Method)
+      clientCore
+        .postEventToAppSensor(module.exports.buildAppSensorRE2JsonEvent(req))
+        .then(function () {
+          return res.send(405)
+        })
+        .catch(function (rejection) {
+          console.log('Error sending Event to AppSensor', rejection)
+          res.send(502)
+        })
     }
   },
 
