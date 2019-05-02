@@ -16,9 +16,8 @@ module.exports = {
         })
         .catch(function (rejection) {
           console.log('Error sending Event to AppSensor', rejection)
-          res.status(502).end()
+          return res.status(502).end()
         })
-        .end()
     },
 
     checkBodyForXssPayload: function dpmCheckBodyForXssPayload (req, res, next) {
@@ -32,7 +31,7 @@ module.exports = {
         })
         .catch(function (rejection) {
           console.log('Error sending Event to AppSensor', rejection)
-          res.status(502).end()
+          return res.status(502).end()
         })
     }
   },

@@ -14,7 +14,7 @@ const Promise = require('bluebird')
 
 let fakeAddAppSensorEventFn
 
-describe('checkHeadersForXssPayload', () => {
+describe('Given we receive a request with malicious XSS headers', () => {
   beforeEach(() => {
     fakeAddAppSensorEventFn = sinon.fake.returns(Promise.resolve({ a: 1 }))
     appsensor
@@ -27,7 +27,7 @@ describe('checkHeadersForXssPayload', () => {
     sinon.restore()
   })
 
-  it('should respond with HTTP 400 Bad Request', async (done) => {
+  it('should respond with HTTP 400 Bad Request & send IE1 to AppSensor', async (done) => {
     await request(server.server)
       .get('/api/BasketItems')
       .set('x-forwarded-for', '127.0.0.1')
@@ -40,15 +40,16 @@ describe('checkHeadersForXssPayload', () => {
         expect(fakeAddAppSensorEventFn).to.be.calledWith(
           sinon.match({
             detectionPoint: {
-              label: 'IE2'
+              label: 'IE1'
             }
           })
         )
       })
     done()
   })
+
   it('should respond with HTTP 502 Bad Gateway if AppSensor server is unavailable', async (done) => {
-    fakeAddAppSensorEventFn = sinon.fake.returns(Promise.reject())
+    fakeAddAppSensorEventFn = sinon.fake.returns(Promise.reject({ error: 'empty error' }))
     appsensor
       .RestRequestHandlerApi
       .prototype
@@ -63,6 +64,13 @@ describe('checkHeadersForXssPayload', () => {
       .send()
       .then(function (res) {
         expect(res).to.have.status(502)
+        expect(fakeAddAppSensorEventFn).to.be.calledWith(
+          sinon.match({
+            detectionPoint: {
+              label: 'IE1'
+            }
+          })
+        )
       })
     done()
   })
