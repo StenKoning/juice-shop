@@ -16,7 +16,7 @@ let fakeAddAppSensorEventFn
 
 describe('Given we receive a request with malicious XSS headers', () => {
   beforeEach(() => {
-    fakeAddAppSensorEventFn = sinon.fake.returns(Promise.resolve({ a: 1 }))
+    fakeAddAppSensorEventFn = sinon.fake.returns(Promise.resolve())
     appsensor
       .RestRequestHandlerApi
       .prototype
@@ -28,7 +28,7 @@ describe('Given we receive a request with malicious XSS headers', () => {
   })
 
   it('should respond with HTTP 400 Bad Request & send IE1 to AppSensor', async (done) => {
-    await request(server.server)
+    request(server.server)
       .get('/api/BasketItems')
       .set('x-forwarded-for', '127.0.0.1')
       .set('Authorization', 'Bearer ' + insecurity.authorize())
@@ -37,6 +37,7 @@ describe('Given we receive a request with malicious XSS headers', () => {
       .send()
       .then(function (res) {
         expect(res).to.have.status(400)
+        expect(fakeAddAppSensorEventFn).to.be.calledOnce()
         expect(fakeAddAppSensorEventFn).to.be.calledWith(
           sinon.match({
             detectionPoint: {
@@ -44,74 +45,8 @@ describe('Given we receive a request with malicious XSS headers', () => {
             }
           })
         )
+        done()
       })
-    done()
-  })
-
-  it('should respond with HTTP 502 Bad Gateway if AppSensor server is unavailable', async (done) => {
-    fakeAddAppSensorEventFn = sinon.fake.returns(Promise.reject({ error: 'empty error' }))
-    appsensor
-      .RestRequestHandlerApi
-      .prototype
-      .resourceRestRequestHandlerAddEventPOST = fakeAddAppSensorEventFn
-
-    await request(server.server)
-      .get('/api/BasketItems')
-      .set('x-forwarded-for', '127.0.0.1')
-      .set('Authorization', 'Bearer ' + insecurity.authorize())
-      .set('content-type', 'application/json')
-      .set('some_header', '<IMG SRC="javascript:alert(\'XSS\');">')
-      .send()
-      .then(function (res) {
-        expect(res).to.have.status(502)
-        expect(fakeAddAppSensorEventFn).to.be.calledWith(
-          sinon.match({
-            detectionPoint: {
-              label: 'IE1'
-            }
-          })
-        )
-      })
-    done()
-  })
-})
-
-describe('Given a malicious HTTP body', () => {
-
-  beforeEach(() => {
-    fakeAddAppSensorEventFn = sinon.fake.returns(Promise.resolve({ a: 1 }))
-    appsensor
-      .RestRequestHandlerApi
-      .prototype
-      .resourceRestRequestHandlerAddEventPOST = fakeAddAppSensorEventFn
-  })
-
-  afterEach(() => {
-    sinon.restore()
-  })
-
-  it('should respond with HTTP 400 Bad Request & send IE1 to AppSensor', async (done) => {
-    await request(server.server)
-      .post('/api/BasketItems')
-      .set('x-forwarded-for', '127.0.0.1')
-      .set('Authorization', 'Bearer ' + insecurity.authorize())
-      .set('content-type', 'application/json')
-      .send(
-        {
-          'name': '<BODY ONLOAD=alert(\'XSS\')>'
-        }
-      )
-      .then(function (res) {
-        expect(res).to.have.status(400)
-        expect(fakeAddAppSensorEventFn).to.be.calledWith(
-          sinon.match({
-            detectionPoint: {
-              label: 'IE1'
-            }
-          })
-        )
-      })
-    done()
   })
 
   it('should respond with HTTP 502 Bad Gateway if AppSensor server is unavailable', async (done) => {
@@ -121,7 +56,74 @@ describe('Given a malicious HTTP body', () => {
       .prototype
       .resourceRestRequestHandlerAddEventPOST = fakeAddAppSensorEventFn
 
-    await request(server.server)
+    request(server.server)
+      .get('/api/BasketItems')
+      .set('x-forwarded-for', '127.0.0.1')
+      .set('Authorization', 'Bearer ' + insecurity.authorize())
+      .set('content-type', 'application/json')
+      .set('some_header', '<IMG SRC="javascript:alert(\'XSS\');">')
+      .send()
+      .then(function (res) {
+        expect(res).to.have.status(502)
+        expect(fakeAddAppSensorEventFn).to.be.calledOnce()
+        expect(fakeAddAppSensorEventFn).to.be.calledWith(
+          sinon.match({
+            detectionPoint: {
+              label: 'IE1'
+            }
+          })
+        )
+        done()
+      })
+  })
+})
+
+describe('Given a malicious HTTP body', () => {
+  beforeEach(() => {
+    fakeAddAppSensorEventFn = sinon.fake.returns(Promise.resolve())
+    appsensor
+      .RestRequestHandlerApi
+      .prototype
+      .resourceRestRequestHandlerAddEventPOST = fakeAddAppSensorEventFn
+  })
+
+  afterEach(() => {
+    sinon.restore()
+  })
+
+  it('should respond with HTTP 400 Bad Request & send IE1 to AppSensor', async (done) => {
+    request(server.server)
+      .post('/api/BasketItems')
+      .set('x-forwarded-for', '127.0.0.1')
+      .set('Authorization', 'Bearer ' + insecurity.authorize())
+      .set('content-type', 'application/json')
+      .send(
+        {
+          'name': '<BODY ONLOAD=alert(\'XSS\')>'
+        }
+      )
+      .then(function (res) {
+        expect(res).to.have.status(400)
+        expect(fakeAddAppSensorEventFn).to.be.calledOnce()
+        expect(fakeAddAppSensorEventFn).to.be.calledWith(
+          sinon.match({
+            detectionPoint: {
+              label: 'IE1'
+            }
+          })
+        )
+        done()
+      })
+  })
+
+  it('should respond with HTTP 502 Bad Gateway if AppSensor server is unavailable', async (done) => {
+    fakeAddAppSensorEventFn = sinon.fake.returns(Promise.reject())
+    appsensor
+      .RestRequestHandlerApi
+      .prototype
+      .resourceRestRequestHandlerAddEventPOST = fakeAddAppSensorEventFn
+
+    request(server.server)
       .post('/api/BasketItems')
       .set('x-forwarded-for', '127.0.0.1')
       .set('Authorization', 'Bearer ' + insecurity.authorize())
@@ -140,7 +142,7 @@ describe('Given a malicious HTTP body', () => {
             }
           })
         )
+        done()
       })
-    done()
   })
 })
