@@ -27,11 +27,11 @@ module.exports = {
       clientCore
         .postEventToAppSensor(module.exports.buildAppSensorRE3JsonEvent(req))
         .then(function () {
-          return res.send(405)
+          return res.status(405).end()
         })
         .catch(function (rejection) {
           console.log('Error sending Event to AppSensor', rejection)
-          res.send(502)
+          res.status(502).end()
         })
     }
   },
