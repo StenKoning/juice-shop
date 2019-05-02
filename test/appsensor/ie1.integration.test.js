@@ -76,7 +76,7 @@ describe('Given we receive a request with malicious XSS headers', () => {
   })
 })
 
-describe('checkBodyForXssPayload', () => {
+describe('Given a malicious HTTP body', () => {
 
   beforeEach(() => {
     fakeAddAppSensorEventFn = sinon.fake.returns(Promise.resolve({ a: 1 }))
@@ -90,7 +90,7 @@ describe('checkBodyForXssPayload', () => {
     sinon.restore()
   })
 
-  it('should respond with HTTP 400 Bad Request', async (done) => {
+  it('should respond with HTTP 400 Bad Request & send IE1 to AppSensor', async (done) => {
     await request(server.server)
       .post('/api/BasketItems')
       .set('x-forwarded-for', '127.0.0.1')
@@ -103,6 +103,13 @@ describe('checkBodyForXssPayload', () => {
       )
       .then(function (res) {
         expect(res).to.have.status(400)
+        expect(fakeAddAppSensorEventFn).to.be.calledWith(
+          sinon.match({
+            detectionPoint: {
+              label: 'IE1'
+            }
+          })
+        )
       })
     done()
   })
@@ -126,6 +133,13 @@ describe('checkBodyForXssPayload', () => {
       )
       .then(function (res) {
         expect(res).to.have.status(502)
+        expect(fakeAddAppSensorEventFn).to.be.calledWith(
+          sinon.match({
+            detectionPoint: {
+              label: 'IE1'
+            }
+          })
+        )
       })
     done()
   })
