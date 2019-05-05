@@ -81,8 +81,7 @@ module.exports = {
 
   payloadContainsMaliciousString: function (requestBody, maliciousValuesArr) {
     let containsMaliciousString = false
-    const requestBodyAsStr = Object.values(requestBody).join()
-
+    const requestBodyAsStr = typeof requestBody === 'string' ? requestBody : Object.values(requestBody).join()
     maliciousValuesArr.forEach(function (commonXssValue) {
       if (requestBodyAsStr.indexOf(commonXssValue) !== -1) {
         containsMaliciousString = true

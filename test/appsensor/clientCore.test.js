@@ -49,7 +49,7 @@ describe('findFirstHeaderThatContainsValueFromArray', () => {
 })
 
 describe('payloadContainsMaliciousString', () => {
-  it('should detect malicious payloads in a given string', async () => {
+  it('should detect malicious payloads in a given string', () => {
     const commonXssValues = [
       '<script>alert(document.cookie);</script>',
       '<script>alert();</script>',
