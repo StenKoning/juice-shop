@@ -17,19 +17,17 @@ module.exports = {
 
       const allowedMethods = Object.keys(routeThatMatchesCurrentPath.methods)
       const unexpectedHttpMethodIsUsed = !allowedMethods.includes(req.method.toLowerCase())
-      if (unexpectedHttpMethodIsUsed) {
-        // report RE1 to AppSensor (Unexpected HTTP Method)
-
-        clientCore
-          .postEventToAppSensor(module.exports.buildAppSensorRE1JsonEvent(req))
-          .then(function () {
-            return res.status(405).end()
-          })
-          .catch(function (rejection) {
-            console.log('Error sending Event to AppSensor', rejection)
-            return res.status(502).end()
-          })
+      if(!unexpectedHttpMethodIsUsed) {
+        next()
       }
+
+      clientCore
+        .postEventToAppSensor(module.exports.buildAppSensorRE1JsonEvent(req))
+        .catch(function (rejection) {
+          console.log('Error sending Event to AppSensor', rejection)
+        })
+
+      return res.status(405).end()
     }
   },
 

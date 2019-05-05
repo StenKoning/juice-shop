@@ -11,13 +11,10 @@ module.exports = {
       }
 
       clientCore.postEventToAppSensor(module.exports.buildAppSensorIE1JsonEvent(req))
-        .then(function (result) {
-          return res.status(400).end()
-        })
         .catch(function (rejection) {
           console.log('Error sending Event to AppSensor', rejection)
-          return res.status(502).end()
         })
+      return res.status(400).end()
     },
 
     checkBodyForXssPayload: function dpmCheckBodyForXssPayload (req, res, next) {

@@ -13,13 +13,11 @@ module.exports = {
       // report RE2 to AppSensor (Attempt To Invoke Unsupported Http Method)
       clientCore
         .postEventToAppSensor(module.exports.buildAppSensorRE2JsonEvent(req))
-        .then(function () {
-          return res.status(405).end()
-        })
         .catch(function (rejection) {
           console.log('Error sending Event to AppSensor', rejection)
-          return res.status(502).end()
         })
+
+      return res.status(405).end()
     }
   },
 
