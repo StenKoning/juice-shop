@@ -6,6 +6,12 @@ module.exports = {
     detectionSystemId: 'myclientapp'
   },
 
+  detectionPoint_CIE1: {
+    category: 'Command Injection',
+    label: 'CIE1',
+    responses: []
+  },
+
   detectionPoint_IE1: {
     category: 'Input Validation',
     label: 'IE1',
@@ -13,25 +19,25 @@ module.exports = {
   },
 
   detectionPoint_RE1: {
-    category: 'Unexpected HTTP Command',
+    category: 'Request',
     label: 'RE1',
     responses: []
   },
 
   detectionPoint_RE2: {
-    category: 'Attempt To Invoke Unsupported HTTP Method',
+    category: 'Request',
     label: 'RE2',
     responses: []
   },
 
   detectionPoint_RE3: {
-    category: 'GET When Expecting POST',
+    category: 'Request',
     label: 'RE3',
     responses: []
   },
 
   detectionPoint_RE4: {
-    category: 'POST When Expecting GET',
+    category: 'Request',
     label: 'RE4',
     responses: []
   },
@@ -50,6 +56,12 @@ module.exports = {
     '<IMG SRC=javascript:alert(\'XSS\')>',
     '<IMG SRC=javascript:alert(&quot;XSS&quot;)">',
     '<BODY ONLOAD=alert(\'XSS\')>'
+  ],
+
+  commonSqlInjectionPayloads: [
+    '\' OR \'1\'=\'1\'',
+    'OR \'a\'=\'a\'',
+    'OR 1=1-- xp_cmdshell UNION JOIN'
   ],
 
   /**
@@ -79,15 +91,15 @@ module.exports = {
     }
   },
 
-  payloadContainsMaliciousString: function (requestBody, maliciousValuesArr) {
-    let containsMaliciousString = false
-    const requestBodyAsStr = typeof requestBody === 'string' ? requestBody : Object.values(requestBody).join()
-    maliciousValuesArr.forEach(function (commonXssValue) {
-      if (requestBodyAsStr.indexOf(commonXssValue) !== -1) {
-        containsMaliciousString = true
+  containsBlacklistedValue: function (strOrObject, maliciousValBlacklist) {
+    let containsBlacklistedValue = false
+    const haystack = typeof strOrObject === 'string' ? strOrObject : Object.values(strOrObject).join()
+    maliciousValBlacklist.forEach(function (blacklistedValueAsNeedle) {
+      if (haystack.indexOf(blacklistedValueAsNeedle) !== -1) {
+        containsBlacklistedValue = true
       }
     })
-    return containsMaliciousString
+    return containsBlacklistedValue
   },
 
   postEventToAppSensor: function (jsonEvent) {

@@ -14,7 +14,7 @@ const Promise = require('bluebird')
 
 let fakeAddAppSensorEventFn
 
-describe('checkURlQueryParamtersForSqlInjection', () => {
+describe('Given we are probing for SQL injection vulnerabilities in the query parameters', () => {
   beforeEach(() => {
     fakeAddAppSensorEventFn = sinon.fake.returns(Promise.resolve())
     appsensor
@@ -27,10 +27,9 @@ describe('checkURlQueryParamtersForSqlInjection', () => {
     sinon.restore()
   })
 
-  it('should return HTTP 200 OK - when there\'s no query parameters', function (done) {
+  it('should do nothing - when there\'s no query parameters', function (done) {
     request(server.server)
       .get('/rest/product/search')
-      //.query({ q: '\';' })
       .set('x-forwarded-for', '127.0.0.1')
       .set('content-type', 'application/json')
       .send()
@@ -41,7 +40,7 @@ describe('checkURlQueryParamtersForSqlInjection', () => {
       })
   })
 
-  it('should return HTTP 200 OK - when query parameters don\'t contain blacklisted values', function (done) {
+  it('should do nothing - when query parameters don\'t contain blacklisted values', function (done) {
     request(server.server)
       .get('/rest/product/search')
       .query({ q: 'apple' })
@@ -55,7 +54,7 @@ describe('checkURlQueryParamtersForSqlInjection', () => {
       })
   })
 
-  it('should respond with HTTP 400 & post a new CIE1 event to AppSensor if the query parameters contain blacklisted values', function (done) {
+  it('should detect, block & post CIE1 event to AppSensor - when blacklisted value found', function (done) {
     const blacklistedValues = [
       '\' OR \'1\'=\'1\'',
       'OR \'a\'=\'a\'',
@@ -89,20 +88,16 @@ describe('checkURlQueryParamtersForSqlInjection', () => {
         values.forEach(function (res) {
           expect(res).to.have.status(400)
         })
-        expect(fakeAddAppSensorEventFn).to.be.calledWithExactly(
+        expect(fakeAddAppSensorEventFn.alwaysCalledWithMatch(
           sinon.match({
             detectionPoint: {
               label: 'CIE1'
             }
           })
-        )
+        )).to.be.true
         expect(fakeAddAppSensorEventFn.callCount).to.equal(3)
       })
     expect(promiseToMakeRequestsAndTestResults).to.be.fulfilled.notify(done)
-  })
-
-  it('should respond with HTTP 400 Bad Request if the query paramters contain blacklisted values', function () {
-
   })
 })
 

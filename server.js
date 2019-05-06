@@ -94,7 +94,10 @@ app.use(compression())
 app.use(expressip().getIpInfoMiddleware)
 
 // AppSensor detectionpoint for IE1
-app.use(detectionPoints.IE1.middleware.checkHeadersForXssPayload)
+app.use([
+  detectionPoints.CIE1.middleware.checkQueryParamtersForSqlInjection,
+  detectionPoints.IE1.middleware.checkHeadersForXssPayload
+])
 
 /* Bludgeon solution for possible CORS problems: Allow everything! */
 app.options('*', cors())

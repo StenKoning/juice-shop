@@ -48,7 +48,7 @@ describe('findFirstHeaderThatContainsValueFromArray', () => {
   })
 })
 
-describe('payloadContainsMaliciousString', () => {
+describe('containsBlacklistedValue', () => {
   it('should detect malicious payloads in a given string', () => {
     const commonXssValues = [
       '<script>alert(document.cookie);</script>',
@@ -62,8 +62,8 @@ describe('payloadContainsMaliciousString', () => {
 
     const payload = '"{"x":5,"y":"<IMG SRC=javascript:alert(\'XSS\')>"}"'
 
-    expect(clientCore.payloadContainsMaliciousString(payload, commonXssValues)).to.be.true
-    expect(clientCore.payloadContainsMaliciousString(payload, ['foo', 'bar'])).to.be.false
+    expect(clientCore.containsBlacklistedValue(payload, commonXssValues)).to.be.true
+    expect(clientCore.containsBlacklistedValue(payload, ['foo', 'bar'])).to.be.false
   })
 })
 
