@@ -71,7 +71,6 @@ const twoFactorAuth = require('./routes/2fa')
 const config = require('config')
 const detectionPoints = require('./appsensor/detectionpoints')
 const expressip = require('express-ip')
-const appSensorClientCore = require('./appsensor/clientCore')
 
 errorhandler.title = `${config.get('application.name')} (Express ${utils.version('express')})`
 
@@ -96,6 +95,7 @@ app.use(expressip().getIpInfoMiddleware)
 // AppSensor detectionpoint for IE1
 app.use([
   detectionPoints.CIE1.middleware.checkQueryParamtersForSqlInjection,
+  detectionPoints.CIE1.middleware.checkHeadersForSqlInjection,
   detectionPoints.IE1.middleware.checkHeadersForXssPayload
 ])
 
@@ -173,7 +173,11 @@ app.use(function jsonParser (req, res, next) {
   next()
 })
 
-app.use(detectionPoints.IE1.middleware.checkBodyForXssPayload)
+app.use([
+  detectionPoints.CIE1.middleware.checkQueryParamtersForSqlInjection,
+  detectionPoints.CIE1.middleware.checkQueryParamtersForSqlInjection,
+  detectionPoints.IE1.middleware.checkBodyForXssPayload
+])
 
 /* HTTP request logging */
 let accessLogStream = require('file-stream-rotator').getStream({ filename: './logs/access.log', frequency: 'daily', verbose: false, max_logs: '2d' })

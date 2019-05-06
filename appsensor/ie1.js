@@ -6,7 +6,7 @@ const Promise = require('bluebird')
 module.exports = {
   middleware: {
     checkHeadersForXssPayload: function dpmCheckHeadersForXssPayload (req, res, next) {
-      if (!module.exports.requestContainsMaliciousHeaders(req)) {
+      if (!clientCore.containsBlacklistedValue(req.headers, clientCore.commonXssPayloads)) {
         return next()
       }
 
@@ -29,14 +29,6 @@ module.exports = {
         })
       return res.status(400).end()
     }
-  },
-
-  requestContainsMaliciousHeaders: function (req) {
-    return Boolean(clientCore
-      .findFirstHeaderThatContainsValueFromArray(
-        req.headers,
-        clientCore.commonXssPayloads
-      ))
   },
 
   buildAppSensorIE1JsonEvent: function (req) {

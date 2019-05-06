@@ -21,6 +21,18 @@ module.exports = {
         })
 
       return res.status(400).end()
+    },
+
+    checkHeadersForSqlInjection: function (req, res, next) {
+      if (!clientCore.containsBlacklistedValue(req.headers, clientCore.commonSqlInjectionPayloads)) {
+        return next()
+      }
+
+      clientCore.postEventToAppSensor(module.exports.buildAppSensorCIE1JsonEvent(req))
+        .catch(function (rejection) {
+          console.log('Error sending Event to AppSensor', rejection)
+        })
+      return res.status(400).end()
     }
   },
 

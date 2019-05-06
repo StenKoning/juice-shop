@@ -8,45 +8,6 @@ chai.use(require('chai-http'))
 
 const clientCore = require('../../appsensor/clientCore')
 
-describe('findFirstHeaderThatContainsValueFromArray', () => {
-  it('should find the first malicious header', async () => {
-    const commonXssValues = [
-      '<script>alert(document.cookie);</script>',
-      '<script>alert();</script>',
-      'alert(String.fromCharCode(88,83,83))',
-      '<IMG SRC="javascript:alert(\'XSS\');">',
-      '<IMG SRC=javascript:alert(\'XSS\')>',
-      '<IMG SRC=javascript:alert(&quot;XSS&quot;)">',
-      '<BODY ONLOAD=alert(\'XSS\')>'
-    ]
-
-    const headers = {
-      'Access-Control-Allow-Credentials': '<script>alert(document.cookie);</script>',
-      'Access-Control-Allow-Headers': '<script>alert();</script>',
-      'Access-Control-Allow-Methods': 'alert(String.fromCharCode(88,83,83))',
-      'Access-Control-Allow-Origin': '<IMG SRC="javascript:alert(\'XSS\');">',
-      'Content-Security-Policy, X-Content-Security-Policy, X-WebKit-CSP': '<IMG SRC=javascript:alert(\'XSS\')>',
-      'Content-Security-Policy-Report-Only': '<IMG SRC=javascript:alert(&quot;XSS&quot;)">',
-      'WWW-Authenticate': '<BODY ONLOAD=alert(\'XSS\')>'
-    }
-
-    // For each common XSS payload value
-    for (let i = 0; i < commonXssValues.length; i++) {
-      const foundMaliciousHeader = clientCore.findFirstHeaderThatContainsValueFromArray(headers, commonXssValues)
-      const actualMaliciousHeader = {
-        name: Object.keys(headers)[i],
-        value: headers[Object.keys(headers)[i]]
-      }
-      expect(foundMaliciousHeader).to.deep.equal(actualMaliciousHeader)
-      // Remove the XSS value from the array, because we've now verified that we can find it
-      commonXssValues.shift()
-    }
-  })
-
-  xit('should be case-insensitive', async () => {
-    expect(true).to.equal(false) // TODO: Implement feature & test
-  })
-})
 
 describe('containsBlacklistedValue', () => {
   it('should detect malicious payloads in a given string', () => {
@@ -64,6 +25,10 @@ describe('containsBlacklistedValue', () => {
 
     expect(clientCore.containsBlacklistedValue(payload, commonXssValues)).to.be.true
     expect(clientCore.containsBlacklistedValue(payload, ['foo', 'bar'])).to.be.false
+  })
+
+  xit('should be case-insensitive', async () => {
+    expect(true).to.equal(false) // TODO: Implement feature & test
   })
 })
 

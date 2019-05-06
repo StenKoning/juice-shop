@@ -64,33 +64,6 @@ module.exports = {
     'OR 1=1-- xp_cmdshell UNION JOIN'
   ],
 
-  /**
-   * Returns a header name and value, who's value contains a value from the given array
-   * @param headersObj object
-   * @param maliciousValuesArr array
-   * @returns  {object}||undefined
-   */
-  findFirstHeaderThatContainsValueFromArray: function (headersObj, maliciousValuesArr) {
-    const matchingHeaderName = _.findKey(headersObj, function (headerValue, headerName) {
-      let headerContainsOneOfTheValues = false
-      maliciousValuesArr.forEach(function (commonXssValue) {
-        if (headerValue.indexOf(commonXssValue) !== -1) {
-          return (headerContainsOneOfTheValues = true)
-        }
-      })
-
-      return headerContainsOneOfTheValues
-    })
-    if (!matchingHeaderName) {
-      return undefined
-    }
-
-    return {
-      name: matchingHeaderName,
-      value: headersObj[matchingHeaderName]
-    }
-  },
-
   containsBlacklistedValue: function (strOrObject, maliciousValBlacklist) {
     let containsBlacklistedValue = false
     const haystack = typeof strOrObject === 'string' ? strOrObject : Object.values(strOrObject).join()
