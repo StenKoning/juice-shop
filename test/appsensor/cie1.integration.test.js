@@ -181,10 +181,3 @@ describe('Given we are probing for SQL injection vulnerabilities in the header v
     expect(promiseToMakeRequestsAndTestResults).to.be.fulfilled.notify(done)
   })
 })
-
-describe('checkHeadersForSqlInjectionPayload', () => {
-  it('should call next() when there\'s no blacklisted value found in header')
-  it('should post a new CIE1 event to AppSensor')
-  it('should respond with HTTP 400 Bad Request')
-  it('should respond with HTTP 502 Bad Gateway if AppSensor server is unavailable')
-})
