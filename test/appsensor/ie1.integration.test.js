@@ -37,36 +37,7 @@ describe('Given we receive a request with malicious XSS headers', () => {
       .send()
       .then(function (res) {
         expect(res).to.have.status(400)
-        expect(fakeAddAppSensorEventFn).to.be.calledOnce()
-        expect(fakeAddAppSensorEventFn).to.be.calledWith(
-          sinon.match({
-            detectionPoint: {
-              label: 'IE1'
-            }
-          })
-        )
-        done()
-      })
-  })
-
-  it('should respond with HTTP 502 Bad Gateway if AppSensor server is unavailable', async (done) => {
-    fakeAddAppSensorEventFn = sinon.fake.returns(Promise.reject())
-    appsensor
-      .RestRequestHandlerApi
-      .prototype
-      .resourceRestRequestHandlerAddEventPOST = fakeAddAppSensorEventFn
-
-    request(server.server)
-      .get('/api/BasketItems')
-      .set('x-forwarded-for', '127.0.0.1')
-      .set('Authorization', 'Bearer ' + insecurity.authorize())
-      .set('content-type', 'application/json')
-      .set('some_header', '<IMG SRC="javascript:alert(\'XSS\');">')
-      .send()
-      .then(function (res) {
-        expect(res).to.have.status(502)
-        expect(fakeAddAppSensorEventFn).to.be.calledOnce()
-        expect(fakeAddAppSensorEventFn).to.be.calledWith(
+        expect(fakeAddAppSensorEventFn).to.be.calledOnceWith(
           sinon.match({
             detectionPoint: {
               label: 'IE1'
@@ -104,38 +75,7 @@ describe('Given a malicious HTTP body', () => {
       )
       .then(function (res) {
         expect(res).to.have.status(400)
-        expect(fakeAddAppSensorEventFn).to.be.calledOnce()
-        expect(fakeAddAppSensorEventFn).to.be.calledWith(
-          sinon.match({
-            detectionPoint: {
-              label: 'IE1'
-            }
-          })
-        )
-        done()
-      })
-  })
-
-  it('should respond with HTTP 502 Bad Gateway if AppSensor server is unavailable', async (done) => {
-    fakeAddAppSensorEventFn = sinon.fake.returns(Promise.reject())
-    appsensor
-      .RestRequestHandlerApi
-      .prototype
-      .resourceRestRequestHandlerAddEventPOST = fakeAddAppSensorEventFn
-
-    request(server.server)
-      .post('/api/BasketItems')
-      .set('x-forwarded-for', '127.0.0.1')
-      .set('Authorization', 'Bearer ' + insecurity.authorize())
-      .set('content-type', 'application/json')
-      .send(
-        {
-          'name': '<BODY ONLOAD=alert(\'XSS\')>'
-        }
-      )
-      .then(function (res) {
-        expect(res).to.have.status(502)
-        expect(fakeAddAppSensorEventFn).to.be.calledWith(
+        expect(fakeAddAppSensorEventFn).to.be.calledOnceWith(
           sinon.match({
             detectionPoint: {
               label: 'IE1'
