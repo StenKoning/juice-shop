@@ -12,7 +12,7 @@ const insecurity = require('../../lib/insecurity')
 
 describe('unexpectedHttpMethodIsUsed', () => {
   it('reports to AppSensor when an unexpected method is used for a route & returns HTTP 405', async (done) => {
-    await request(server.server)
+    request(server.server)
       .copy('/api/BasketItems')
       .set('x-forwarded-for', '127.0.0.1')
       .set('Authorization', 'Bearer ' + insecurity.authorize())
@@ -20,6 +20,7 @@ describe('unexpectedHttpMethodIsUsed', () => {
       .send()
       .then(function (res) {
         expect(res).to.have.status(405)
+        done()
       })
   })
 })

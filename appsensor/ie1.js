@@ -6,6 +6,10 @@ const Promise = require('bluebird')
 module.exports = {
   middleware: {
     checkHeadersForXssPayload: function dpmCheckHeadersForXssPayload (req, res, next) {
+      if (_.isEmpty(req.headers)) {
+        return next()
+      }
+
       if (!clientCore.containsBlacklistedValue(req.headers, clientCore.commonXssPayloads)) {
         return next()
       }

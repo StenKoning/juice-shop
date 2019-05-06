@@ -13,7 +13,6 @@ const clientCore = require('../../appsensor/clientCore')
 const Promise = require('bluebird')
 const checkHeadersForXssPayload = require('../../appsensor/ie1').middleware.checkHeadersForXssPayload
 const checkBodyForXssPayload = require('../../appsensor/ie1').middleware.checkBodyForXssPayload
-const requestContainsMaliciousHeaders = require('../../appsensor/ie1').requestContainsMaliciousHeaders
 
 let fakeAddAppSensorEventFn
 
@@ -41,7 +40,7 @@ describe('checkHeadersForXssPayload', () => {
 
     const next = sinon.spy()
     checkHeadersForXssPayload(mockReq(request), mockRes(), next)
-    expect(next).to.be.called()
+    expect(next).to.be.called
   })
 
   it('should post a new IE1 event to AppSensor', () => {
@@ -89,7 +88,7 @@ describe('checkBodyForXssPayload', () => {
 
     const next = sinon.spy()
     checkHeadersForXssPayload(mockReq(request), mockRes(), next)
-    expect(next).to.be.called()
+    expect(next).to.be.called
   })
 
   it('should post a new IE1 event to AppSensor', () => {
@@ -112,28 +111,5 @@ describe('checkBodyForXssPayload', () => {
         })
       )
     })
-  })
-})
-
-describe('requestContainsMaliciousHeaders', () => {
-  it('should return true if given header array contains a value from blacklist', () => {
-    const request = {
-      headers: {
-        'x-forwarded-for': '127.0.0.1',
-        'some-malicious-header': '$@DSA' + clientCore.commonXssPayloads[0] + '#%#@#'
-      }
-    }
-
-    expect(requestContainsMaliciousHeaders(mockReq(request))).to.be.true
-  })
-  it('should return false if given header array doesn\'t contain a value from blacklist', () => {
-    const request = {
-      headers: {
-        'x-forwarded-for': '127.0.0.1',
-        'some-malicious-header': '$@DSA#%#@#'
-      }
-    }
-
-    expect(requestContainsMaliciousHeaders(mockReq(request))).to.be.false
   })
 })
