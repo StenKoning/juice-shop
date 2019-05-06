@@ -41,7 +41,7 @@ describe('checkHeadersForXssPayload', () => {
 
     const next = sinon.spy()
     checkHeadersForXssPayload(mockReq(request), mockRes(), next)
-    expect(next).to.be.called
+    expect(next).to.be.called()
   })
 
   it('should post a new IE1 event to AppSensor', () => {
@@ -67,7 +67,6 @@ describe('checkHeadersForXssPayload', () => {
 })
 
 describe('checkBodyForXssPayload', () => {
-
   beforeEach(() => {
     fakeAddAppSensorEventFn = sinon.fake.returns(Promise.resolve({ a: 1 }))
     appsensor
@@ -90,7 +89,7 @@ describe('checkBodyForXssPayload', () => {
 
     const next = sinon.spy()
     checkHeadersForXssPayload(mockReq(request), mockRes(), next)
-    expect(next).to.be.called
+    expect(next).to.be.called()
   })
 
   it('should post a new IE1 event to AppSensor', () => {

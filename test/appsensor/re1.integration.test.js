@@ -35,35 +35,7 @@ describe('Given unexpectedHttpMethodIsUsed on a route', () => {
       .send()
       .then(function (res) {
         expect(res).to.have.status(405)
-        //expect(fakeAddAppSensorEventFn).to.be.calledOnce()
-        expect(fakeAddAppSensorEventFn).to.be.calledWith(
-          sinon.match({
-            detectionPoint: {
-              label: 'RE0'
-            }
-          })
-        )
-        done()
-      })
-  })
-
-  it('should respond with HTTP 502 Bad Gateway if AppSensor server is unavailable', async (done) => {
-    fakeAddAppSensorEventFn = sinon.fake.returns(Promise.reject())
-    appsensor
-      .RestRequestHandlerApi
-      .prototype
-      .resourceRestRequestHandlerAddEventPOST = fakeAddAppSensorEventFn
-
-    request(server.server)
-      .trace('/api/BasketItems')
-      .set('x-forwarded-for', '127.0.0.1')
-      .set('Authorization', 'Bearer ' + insecurity.authorize())
-      .set('content-type', 'application/json')
-      .send()
-      .then(function (res) {
-        expect(res).to.have.status(502)
-        expect(fakeAddAppSensorEventFn).to.be.calledOnce()
-        expect(fakeAddAppSensorEventFn).to.be.calledWith(
+        expect(fakeAddAppSensorEventFn).to.be.calledOnceWith(
           sinon.match({
             detectionPoint: {
               label: 'RE1'

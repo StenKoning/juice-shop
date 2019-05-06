@@ -7,7 +7,7 @@ module.exports = {
     attemptToInvokeUnsupportedHttpMethod: function (req, res, next) {
       const allowedMethods = ['HEAD', 'GET', 'POST', 'PUT', 'DELETE', 'TRACE', 'OPTIONS', 'CONNECT']
       if (allowedMethods.includes(req.method.toUpperCase())) {
-        next()
+        return next()
       }
 
       // report RE2 to AppSensor (Attempt To Invoke Unsupported Http Method)

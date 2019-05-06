@@ -17,8 +17,8 @@ module.exports = {
 
       const allowedMethods = Object.keys(routeThatMatchesCurrentPath.methods)
       const unexpectedHttpMethodIsUsed = !allowedMethods.includes(req.method.toLowerCase())
-      if(!unexpectedHttpMethodIsUsed) {
-        next()
+      if (!unexpectedHttpMethodIsUsed) {
+        return next()
       }
 
       clientCore

@@ -22,14 +22,12 @@ module.exports = {
         return next()
       }
 
-      clientCore.postEventToAppSensor(module.exports.buildAppSensorIE1JsonEvent(req))
-        .then(function () {
-          return res.status(400).end()
-        })
+      clientCore
+        .postEventToAppSensor(module.exports.buildAppSensorIE1JsonEvent(req))
         .catch(function (rejection) {
           console.log('Error sending Event to AppSensor', rejection)
-          return res.status(502).end()
         })
+      return res.status(400).end()
     }
   },
 
