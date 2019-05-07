@@ -176,6 +176,7 @@ app.use(function jsonParser (req, res, next) {
 app.use([
   detectionPoints.CIE1.middleware.checkQueryParamtersForSqlInjection,
   detectionPoints.CIE1.middleware.checkQueryParamtersForSqlInjection,
+  detectionPoints.CIE1.middleware.checkBodyForSqlInjection,
   detectionPoints.IE1.middleware.checkBodyForXssPayload
 ])
 

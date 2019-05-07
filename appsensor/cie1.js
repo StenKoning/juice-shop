@@ -33,6 +33,22 @@ module.exports = {
           console.log('Error sending Event to AppSensor', rejection)
         })
       return res.status(400).end()
+    },
+
+    checkBodyForSqlInjection: function (req, res, next) {
+      if (_.isEmpty(req.body)) {
+        return next()
+      }
+
+      if (!clientCore.containsBlacklistedValue(req.body, clientCore.commonSqlInjectionPayloads)) {
+        return next()
+      }
+
+      clientCore.postEventToAppSensor(module.exports.buildAppSensorCIE1JsonEvent(req))
+        .catch(function (rejection) {
+          console.log('Error sending Event to AppSensor', rejection)
+        })
+      return res.status(400).end()
     }
   },
 
