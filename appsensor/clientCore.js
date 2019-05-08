@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const appsensor = require('../appsensor/api')
+const insecurity = require('../lib/insecurity')
 
 module.exports = {
   detectionSystem: {
@@ -85,7 +86,7 @@ module.exports = {
 
   buildJsonUser: function buildJsonUser (req, fnGetClientIpAddress) {
     return {
-      username: 'Guest',
+      username: insecurity.authenticatedUsers.from(req).data.email || 'Guest',
       ipAddress: module.exports.buildJsonIpAddress(req, fnGetClientIpAddress)
     }
   },
