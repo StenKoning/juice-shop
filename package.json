@@ -71,6 +71,7 @@
     "config": "~2.0.0",
     "cookie-parser": "^1.4.4",
     "cors": "~2.8.5",
+    "dotenv": "^8.0.0",
     "dottie": "~2.0.1",
     "download": "~7.1.0",
     "epilogue-js": "~0.7",
@@ -118,6 +119,7 @@
     "swagger-ui-express": "^4.0.2",
     "unzipper": "0.8.12",
     "winston": "^3.2.1",
+    "ws": "^7.0.0",
     "z85": "~0.0"
   },
   "devDependencies": {

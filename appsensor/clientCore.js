@@ -85,8 +85,13 @@ module.exports = {
   },
 
   buildJsonUser: function buildJsonUser (req, fnGetClientIpAddress) {
+    const user = insecurity.authenticatedUsers.from(req)
+    if (user) {
+      var username = user.data.email || 'Guest'
+    }
+
     return {
-      username: insecurity.authenticatedUsers.from(req).data.email || 'Guest',
+      username: username || 'Guest',
       ipAddress: module.exports.buildJsonIpAddress(req, fnGetClientIpAddress)
     }
   },

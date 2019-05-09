@@ -71,6 +71,11 @@ const twoFactorAuth = require('./routes/2fa')
 const config = require('config')
 const detectionPoints = require('./appsensor/detectionpoints')
 const expressip = require('express-ip')
+const WebSocket = require('ws')
+
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 
 errorhandler.title = `${config.get('application.name')} (Express ${utils.version('express')})`
 
@@ -358,6 +363,25 @@ app.use(verify.errorHandlingChallenge())
 app.use(errorhandler())
 
 
+function openAppSensorWebsocketConnection () {
+  const wsConn = new WebSocket(process.env.APPSENSOR_WEB_SOCKET_HOST_URL || 'ws://localhost:8085/dashboard')
+  wsConn.onopen = function () {
+    console.log('WebSocket connection opened')
+  }
+  wsConn.onmessage = function (event) {
+    const parsedData = JSON.parse(event.data)
+    console.log('WS MSG FROM SERVER: ', parsedData)
+
+    const RESPONSE_EVENT = 'response'
+    if (!parsedData.dataType || parsedData.dataType !== RESPONSE_EVENT) {
+      return 1
+    }
+
+    
+  }
+  return wsConn
+}
+
 exports.start = async function (readyCallback) {
   await models.sequelize.sync({ force: true })
   await datacreator()
@@ -365,6 +389,9 @@ exports.start = async function (readyCallback) {
   server.listen(process.env.PORT || config.get('server.port'), () => {
     logger.info(colors.cyan(`Server listening on port ${config.get('server.port')}`))
     require('./lib/startup/registerWebsocketEvents')(server)
+
+    const wsConn = openAppSensorWebsocketConnection()
+
     if (readyCallback) {
       readyCallback()
     }
