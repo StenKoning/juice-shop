@@ -1,14 +1,45 @@
 const _ = require('lodash')
 const appsensor = require('../appsensor/api')
+const insecurity = require('../lib/insecurity')
 
 module.exports = {
   detectionSystem: {
     detectionSystemId: 'myclientapp'
   },
 
+  detectionPoint_CIE1: {
+    category: 'Command Injection',
+    label: 'CIE1',
+    responses: []
+  },
+
   detectionPoint_IE1: {
     category: 'Input Validation',
     label: 'IE1',
+    responses: []
+  },
+
+  detectionPoint_RE1: {
+    category: 'Request',
+    label: 'RE1',
+    responses: []
+  },
+
+  detectionPoint_RE2: {
+    category: 'Request',
+    label: 'RE2',
+    responses: []
+  },
+
+  detectionPoint_RE3: {
+    category: 'Request',
+    label: 'RE3',
+    responses: []
+  },
+
+  detectionPoint_RE4: {
+    category: 'Request',
+    label: 'RE4',
     responses: []
   },
 
@@ -28,43 +59,21 @@ module.exports = {
     '<BODY ONLOAD=alert(\'XSS\')>'
   ],
 
-  /**
-   * Returns a header name and value, who's value contains a value from the given array
-   * @param headersObj object
-   * @param maliciousValuesArr array
-   * @returns  {object}||undefined
-   */
-  findFirstHeaderThatContainsValueFromArray: function (headersObj, maliciousValuesArr) {
-    const matchingHeaderName = _.findKey(headersObj, function (headerValue, headerName) {
-      let headerContainsOneOfTheValues = false
-      maliciousValuesArr.forEach(function (commonXssValue) {
-        if (headerValue.indexOf(commonXssValue) !== -1) {
-          return (headerContainsOneOfTheValues = true)
-        }
-      })
+  commonSqlInjectionPayloads: [
+    '\' OR \'1\'=\'1\'',
+    'OR \'a\'=\'a\'',
+    'OR 1=1-- xp_cmdshell UNION JOIN'
+  ],
 
-      return headerContainsOneOfTheValues
-    })
-    if (!matchingHeaderName) {
-      return undefined
-    }
-
-    return {
-      name: matchingHeaderName,
-      value: headersObj[matchingHeaderName]
-    }
-  },
-
-  payloadContainsMaliciousString: function (requestBody, maliciousValuesArr) {
-    let containsMaliciousString = false
-    const requestBodyAsStr = Object.values(requestBody).join()
-
-    maliciousValuesArr.forEach(function (commonXssValue) {
-      if (requestBodyAsStr.indexOf(commonXssValue) !== -1) {
-        containsMaliciousString = true
+  containsBlacklistedValue: function (strOrObject, maliciousValBlacklist) {
+    let containsBlacklistedValue = false
+    const haystack = typeof strOrObject === 'string' ? strOrObject : Object.values(strOrObject).join()
+    maliciousValBlacklist.forEach(function (blacklistedValueAsNeedle) {
+      if (haystack.indexOf(blacklistedValueAsNeedle) !== -1) {
+        containsBlacklistedValue = true
       }
     })
-    return containsMaliciousString
+    return containsBlacklistedValue
   },
 
   postEventToAppSensor: function (jsonEvent) {
@@ -76,8 +85,13 @@ module.exports = {
   },
 
   buildJsonUser: function buildJsonUser (req, fnGetClientIpAddress) {
+    const user = insecurity.authenticatedUsers.from(req)
+    if (user) {
+      var username = user.data.email || 'Guest'
+    }
+
     return {
-      username: 'Guest',
+      username: username || 'Guest',
       ipAddress: module.exports.buildJsonIpAddress(req, fnGetClientIpAddress)
     }
   },
