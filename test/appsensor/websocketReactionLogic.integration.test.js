@@ -13,16 +13,25 @@ const insecurity = require('../../lib/insecurity')
 const Promise = require('bluebird')
 const models = require('../../models/index')
 const utils = require('../../lib/utils')
+const WebSocket = require('mock-websocket').WebSocket
+const WebSocketServer = require('mock-websocket').Server
+const websocketReactionLogic = require('../../appsensor/websocketReactionLogic')
 
 let fakeAddAppSensorEventFn
+let clientWebSocketFake
+let mockWebsocketServer
 
 describe('Given we receive information about a ASR-J response from AppSensor & the related user is not a guest', () => {
+
   beforeEach(() => {
     fakeAddAppSensorEventFn = sinon.fake.returns(Promise.resolve())
     appsensor
       .RestRequestHandlerApi
       .prototype
       .resourceRestRequestHandlerAddEventPOST = fakeAddAppSensorEventFn
+    mockWebsocketServer = new WebSocketServer('ws://localhost:8085/dashboard')
+    clientWebSocketFake = new WebSocket(process.env.APPSENSOR_WEB_SOCKET_HOST_URL)
+    //websocketReactionLogic.openConn = sinon.fake.returns(clientWebSocketFake)
   })
 
   afterEach(() => {
@@ -43,12 +52,37 @@ describe('Given we receive information about a ASR-J response from AppSensor & t
       promiseToAttemptXssAttack,
       promiseToAttemptXssAttack,
       promiseToAttemptXssAttack
-    ]).then(new Promise(resolve => setTimeout(resolve, 200))
+    ]).then(() => {
+      mockWebsocketServer.send({
+        dataType: 'response',
+        dataValue: {
+          user: {
+            username: 'Guest',
+            ipAddress: [
+              Object
+            ]
+          },
+          timestamp: '2019-05-09T10:39:41.221Z',
+          action: 'logout',
+          interval: {
+            duration: 10,
+            unit: 'minutes'
+          },
+          detectionSystem: {
+            detectionSystemId: 'myclientapp'
+          },
+          metadata: [
+
+          ],
+          active: false
+        }
+      })
+    })
+      .then(new Promise(resolve => setTimeout(resolve, 50)))
       .then(function () {
         expect(insecurity.authenticatedUsers.get(token)).to.be.undefined
         done()
-      }))
-
+      })
   })
 
   function promiseToAttemptXssAttack () {
