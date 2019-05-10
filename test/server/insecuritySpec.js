@@ -113,6 +113,14 @@ describe('insecurity', () => {
       expect(insecurity.authenticatedUsers.from({ headers: {} })).to.equal(undefined)
       expect(insecurity.authenticatedUsers.from({})).to.equal(undefined)
     })
+
+    it('removes a user from the authenticated users list', () => {
+      insecurity.authenticatedUsers.put('11111', { data: { id: 1 } })
+      const user = insecurity.authenticatedUsers.get('11111')
+      expect(user).to.deep.equal({ data: { id: 1 } })
+      insecurity.authenticatedUsers.remove(user)
+      expect(insecurity.authenticatedUsers.get('11111')).to.equal(undefined)
+    })
   })
 
   describe('sanitizeHtml', () => {
