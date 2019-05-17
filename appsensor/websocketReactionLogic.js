@@ -3,10 +3,19 @@ const User = require('../models/user')
 const WebSocket = require('ws')
 
 module.exports = {
-  openConn: function () {
-    return new WebSocket(
+  openConn: async function () {
+    const wsConn =  new WebSocket(
       process.env.APPSENSOR_WEB_SOCKET_HOST_URL
     )
+
+    wsConn.onerror = function (event) {
+      if (event.error.errno === 'ECONNREFUSED') {
+        console.log(`Couldn\'t connect to AppSensor WebSocket API
+         on ${process.env.APPSENSOR_WEB_SOCKET_HOST_URL}, automated response disabled`)
+      }
+    }
+
+    return wsConn
   },
 
   initEventListeners: function (wsConn) {

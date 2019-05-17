@@ -71,6 +71,7 @@ const twoFactorAuth = require('./routes/2fa')
 const config = require('config')
 const detectionPoints = require('./appsensor/detectionpoints')
 const expressip = require('express-ip')
+const appsensorWs = require('./appsensor/websocketReactionLogic')
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
@@ -370,8 +371,8 @@ exports.start = async function (readyCallback) {
     logger.info(colors.cyan(`Server listening on port ${config.get('server.port')}`))
     require('./lib/startup/registerWebsocketEvents')(server)
 
-    const wsConn = require('./appsensor/websocketReactionLogic').openConn()
-    require('./appsensor/websocketReactionLogic').initEventListeners(wsConn)
+    const wsConn = appsensorWs.openConn()
+    appsensorWs.initEventListeners(wsConn)
     app.set('appSensorWsConn', wsConn)
 
     if (readyCallback) {
