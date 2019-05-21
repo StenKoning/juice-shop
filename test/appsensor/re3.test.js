@@ -10,12 +10,22 @@ const appsensor = require('../../appsensor/api')
 const server = require('../../server')
 const insecurity = require('../../lib/insecurity')
 
-describe('getWhenExpectingPost', () => {
-  it('reports to AppSensor when getting GET on POST only route & returns HTTP 405', async (done) => {
-    /*const appsensorReporter = new appsensor.RestReportingEngineApi()
-    const initialEventCountPromise = await appsensorReporter.resourceRestReportingEngineCountEventsGET()
-    const initialEventCount = initialEventCountPromise.response.body*/
+let fakeAddAppSensorEventFn
 
+describe('Given we receive a GET request when we expect a POST on a file-upload', () => {
+  beforeEach(() => {
+    fakeAddAppSensorEventFn = sinon.fake.returns(Promise.resolve())
+    appsensor
+      .RestRequestHandlerApi
+      .prototype
+      .resourceRestRequestHandlerAddEventPOST = fakeAddAppSensorEventFn
+  })
+
+  afterEach(() => {
+    sinon.restore()
+  })
+
+  it('should sent a RE3 event to AppSensor', async (done) => {
     await request(server.server)
       .get('/file-upload')
       .set('x-forwarded-for', '127.0.0.1')
@@ -23,19 +33,14 @@ describe('getWhenExpectingPost', () => {
       .send()
       .then(function (res) {
         expect(res).to.have.status(405)
+        expect(fakeAddAppSensorEventFn).to.be.calledOnceWith(
+          sinon.match({
+            detectionPoint: {
+              label: 'RE3'
+            }
+          })
+        )
       })
-
-    /*const eventCountAfterMaliciousRequestPromise = await appsensorReporter.resourceRestReportingEngineCountEventsGET()
-    const eventCountAfterMaliciousRequest = eventCountAfterMaliciousRequestPromise.response.body
-
-    expect(eventCountAfterMaliciousRequest).to.equal(initialEventCount + 1)*/
     done()
   })
-})
-
-describe('receivingGetWhenExpectingPost', () => {
-  it('should return next() if the HTTP verb is not \'GET\'')
-  it('should post a new RE3 event to AppSensor')
-  it('should respond with 405 Method Not Allowed')
-  it('should respond with HTTP 502 Bad Gateway if AppSensor server is unavailable')
 })
