@@ -1,6 +1,6 @@
 
 module.exports = {
-  CIE1: require('./CIE1'),
+  CIE1: require('./cie1'),
   IE1: require('./ie1'),
   RE1: require('./re1'),
   RE2: require('./re2'),
