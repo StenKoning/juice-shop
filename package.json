@@ -209,7 +209,6 @@
     "globalTeardown": "./test/apiTestsTeardown.js",
     "setupTestFrameworkScriptFile": "./test/apiTestsSetupJest.js",
     "testMatch": [
-      "**/test/**/*.js",
       "**/test/appsensor/*.js"
     ],
     "testPathIgnorePatterns": [
