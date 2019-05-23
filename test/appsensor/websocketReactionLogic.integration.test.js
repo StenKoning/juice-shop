@@ -31,7 +31,7 @@ describe('Given we receive information about a ASR-J response from AppSensor & t
       .resourceRestRequestHandlerAddEventPOST = fakeAddAppSensorEventFn
     mockWebsocketServer = new WebSocketServer('ws://localhost:8085/dashboard')
     clientWebSocketFake = new WebSocket(process.env.APPSENSOR_WEB_SOCKET_HOST_URL)
-    //websocketReactionLogic.openConn = sinon.fake.returns(clientWebSocketFake)
+    //websocketReactionLogic.setupConnection = sinon.fake.returns(clientWebSocketFake)
   })
 
   afterEach(() => {

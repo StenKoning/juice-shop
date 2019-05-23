@@ -8,37 +8,37 @@ module.exports = {
   },
 
   detectionPoint_CIE1: {
-    category: 'Command Injection',
+    category: 'Command Injection Exception',
     label: 'CIE1',
     responses: []
   },
 
   detectionPoint_IE1: {
-    category: 'Input Validation',
+    category: 'Input Exception',
     label: 'IE1',
     responses: []
   },
 
   detectionPoint_RE1: {
-    category: 'Request',
+    category: 'Request Exception',
     label: 'RE1',
     responses: []
   },
 
   detectionPoint_RE2: {
-    category: 'Request',
+    category: 'Request Exception',
     label: 'RE2',
     responses: []
   },
 
   detectionPoint_RE3: {
-    category: 'Request',
+    category: 'Request Exception',
     label: 'RE3',
     responses: []
   },
 
   detectionPoint_RE4: {
-    category: 'Request',
+    category: 'Request Exception',
     label: 'RE4',
     responses: []
   },

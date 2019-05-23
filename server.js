@@ -371,9 +371,7 @@ exports.start = async function (readyCallback) {
     logger.info(colors.cyan(`Server listening on port ${config.get('server.port')}`))
     require('./lib/startup/registerWebsocketEvents')(server)
 
-    const wsConn = appsensorWs.openConn()
-    appsensorWs.initEventListeners(wsConn)
-    app.set('appSensorWsConn', wsConn)
+    app.set('appSensorWsConn', appsensorWs.setupConnection())
 
     if (readyCallback) {
       readyCallback()
