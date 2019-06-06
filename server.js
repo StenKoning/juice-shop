@@ -71,7 +71,7 @@ const twoFactorAuth = require('./routes/2fa')
 const config = require('config')
 const detectionPoints = require('./appsensor/detectionpoints')
 const expressip = require('express-ip')
-const appsensorWs = require('./appsensor/websocketReactionLogic')
+const appsensorWs = require('./appsensor/reportingEngineConsumer')
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()

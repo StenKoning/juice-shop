@@ -15,7 +15,7 @@ const models = require('../../models/index')
 const utils = require('../../lib/utils')
 const WebSocket = require('mock-websocket').WebSocket
 const WebSocketServer = require('mock-websocket').Server
-const websocketReactionLogic = require('../../appsensor/websocketReactionLogic')
+const websocketReactionLogic = require('../../appsensor/reportingEngineConsumer')
 
 let fakeAddAppSensorEventFn
 let clientWebSocketFake

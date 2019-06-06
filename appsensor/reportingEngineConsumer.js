@@ -21,7 +21,6 @@ module.exports = {
 
   onMessage: function (message) {
     const parsedEvent = JSON.parse(message.data)
-    //console.log('WS MSG FROM SERVER: ', parsedEvent)
 
     const eventName = parsedEvent.dataType
     const eventMethodExists = Object.keys(module.exports.eventMethods).includes(eventName)

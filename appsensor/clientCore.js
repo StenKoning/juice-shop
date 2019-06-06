@@ -8,7 +8,7 @@ module.exports = {
   },
 
   detectionPoint_CIE1: {
-    category: 'Command Injection Exception',
+    category: 'Command Injection',
     label: 'CIE1',
     responses: []
   },
